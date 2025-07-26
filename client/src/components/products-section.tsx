@@ -46,6 +46,11 @@ export default function ProductsSection() {
 
 
 
+  // Debug logging
+  console.log('Debug - Featured products:', featuredProducts);
+  console.log('Debug - All products:', allProducts);
+  console.log('Debug - Loading states:', { featuredLoading, allLoading });
+
   if (featuredLoading || allLoading) {
     return (
       <div className="py-20 bg-gray-900 flex items-center justify-center">
@@ -64,6 +69,9 @@ export default function ProductsSection() {
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">Each blend tells a story of tradition, quality, and passion</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="col-span-full text-center text-gray-300 bg-red-500 p-4">
+              TEST: Featured products count: {featuredProducts.length}
+            </div>
             {featuredProducts.length === 0 ? (
               <div className="col-span-full text-center text-gray-300">
                 No featured products available
