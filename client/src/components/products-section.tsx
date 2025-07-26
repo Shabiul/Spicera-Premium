@@ -46,10 +46,7 @@ export default function ProductsSection() {
 
 
 
-  // Debug logging
-  console.log('Debug - Featured products:', featuredProducts);
-  console.log('Debug - All products:', allProducts);
-  console.log('Debug - Loading states:', { featuredLoading, allLoading });
+
 
   if (featuredLoading || allLoading) {
     return (
@@ -69,50 +66,34 @@ export default function ProductsSection() {
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">Each blend tells a story of tradition, quality, and passion</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            <div className="col-span-full text-center text-gray-300 bg-red-500 p-4">
-              TEST: Featured products count: {featuredProducts.length}
-            </div>
-            {featuredProducts.length === 0 ? (
-              <div className="col-span-full text-center text-gray-300">
-                No featured products available
-              </div>
-            ) : (
-              featuredProducts.slice(0, 3).map((product, index) => (
-                <div key={product.id} className={`hover-lift glass-card rounded-2xl overflow-hidden shadow-lg border border-gray-200 ${index % 2 === 0 ? 'fade-in-left' : 'fade-in-right'}`}>
-                  <div className="relative">
-                    <img 
-                      src={`https://images.unsplash.com/photo-1596040033229-a9821ebd058d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600&q=80`} 
-                      alt={product.name} 
-                      className="w-full h-64 object-cover"
-                    />
-                    {product.featured && (
-                      <Badge className="absolute top-4 left-4 bg-spice-gold text-black font-semibold">
-                        Featured
-                      </Badge>
-                    )}
-                    {getCartQuantity(product.id) > 0 && (
-                      <Badge className="absolute top-4 right-4 bg-green-600 text-white">
-                        In Cart ({getCartQuantity(product.id)})
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="p-6 lg:p-8">
-                    <h3 className="font-display text-xl lg:text-2xl font-semibold text-white mb-3">{product.name}</h3>
-                    <p className="text-gray-300 mb-4 text-sm lg:text-base">{product.description}</p>
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                      <span className="text-spice-gold font-semibold text-lg">${product.price}</span>
-                      <Button 
-                        onClick={() => addToCart(product.id, product.name)}
-                        className="bg-spice-gold text-black px-6 py-2 rounded-full hover:bg-spice-amber transition-all duration-300 hover:transform hover:scale-105 hover-glow w-full sm:w-auto flex items-center gap-2"
-                      >
-                        <ShoppingCart size={16} />
-                        Add to Cart
-                      </Button>
-                    </div>
-                  </div>
+            {featuredProducts.map((product, index) => (
+              <div key={product.id} className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                <div className="relative mb-4">
+                  <img 
+                    src={`https://images.unsplash.com/photo-1596040033229-a9821ebd058d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600&q=80`} 
+                    alt={product.name} 
+                    className="w-full h-48 object-cover rounded-lg"
+                  />
+                  {product.featured && (
+                    <Badge className="absolute top-2 left-2 bg-yellow-500 text-black">
+                      Featured
+                    </Badge>
+                  )}
                 </div>
-              ))
-            )}
+                <h3 className="text-xl font-bold text-white mb-2">{product.name}</h3>
+                <p className="text-gray-300 mb-4 text-sm">{product.description}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-yellow-500 font-bold text-lg">${product.price}</span>
+                  <Button 
+                    onClick={() => addToCart(product.id, product.name)}
+                    className="bg-yellow-500 text-black hover:bg-yellow-600 px-4 py-2 rounded flex items-center gap-2"
+                  >
+                    <ShoppingCart size={16} />
+                    Add to Cart
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -126,30 +107,30 @@ export default function ProductsSection() {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {allProducts.slice(0, 8).map((product, index) => (
-              <div key={product.id} className="hover-lift glass-card bg-gray-900/50 rounded-xl p-6 text-center fade-in border border-gray-800/50 hover-rotate relative">
+            {allProducts.map((product, index) => (
+              <div key={product.id} className="bg-gray-900 rounded-xl p-4 border border-gray-700 text-center">
                 <div className="relative mb-4">
                   <img 
                     src={`https://images.unsplash.com/photo-${index % 2 === 0 ? '1596040033229-a9821ebd058d' : '1506905925346-21bda4d32df4'}?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80`} 
                     alt={product.name} 
-                    className="w-full h-48 object-cover rounded-lg"
+                    className="w-full h-32 object-cover rounded-lg"
                   />
                   {getCartQuantity(product.id) > 0 && (
-                    <Badge className="absolute -top-2 -right-2 bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-xs">
+                    <Badge className="absolute -top-2 -right-2 bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
                       {getCartQuantity(product.id)}
                     </Badge>
                   )}
                 </div>
-                <h3 className="font-display text-lg lg:text-xl font-semibold text-white mb-2">{product.name}</h3>
-                <p className="text-gray-400 text-xs lg:text-sm mb-4 line-clamp-2">{product.description}</p>
-                <div className="flex flex-col gap-3">
-                  <span className="text-spice-gold font-bold text-lg">${product.price}</span>
+                <h3 className="text-lg font-bold text-white mb-2">{product.name}</h3>
+                <p className="text-gray-400 text-xs mb-3">{product.description.slice(0, 80)}...</p>
+                <div className="flex flex-col gap-2">
+                  <span className="text-yellow-500 font-bold">${product.price}</span>
                   <Button 
                     onClick={() => addToCart(product.id, product.name)}
                     size="sm"
-                    className="bg-spice-gold text-black hover:bg-spice-amber transition-all duration-300 hover:transform hover:scale-105 flex items-center gap-1"
+                    className="bg-yellow-500 text-black hover:bg-yellow-600 text-xs px-3 py-1 rounded flex items-center gap-1 justify-center"
                   >
-                    <Plus size={14} />
+                    <Plus size={12} />
                     Add to Cart
                   </Button>
                 </div>
