@@ -195,7 +195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         quantity: item.quantity,
         unitPrice: item.product.price,
         totalPrice: (parseFloat(item.product.price) * item.quantity).toString(),
-      }));
+      })) as Omit<InsertOrderItem, 'id'>[];
 
       const order = await storage.createOrder(orderData, orderItems);
       

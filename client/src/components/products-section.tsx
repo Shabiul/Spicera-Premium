@@ -1,57 +1,57 @@
+import { useQuery } from "@tanstack/react-query";
+import { ShoppingCart, Plus } from "lucide-react";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-
-const featuredProducts = [
-  {
-    id: 1,
-    name: "Royal Garam Masala",
-    description: "A harmonious blend of 12 carefully selected whole spices, roasted to perfection and ground fresh. Our signature blend brings warmth and complexity to any dish.",
-    price: "From $24.99",
-    image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
-  },
-  {
-    id: 2,
-    name: "Heritage Curry Powder",
-    description: "An authentic family recipe passed down through generations. Featuring turmeric, coriander, and cumin with a perfect balance of heat and aroma.",
-    price: "From $19.99",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
-  },
-  {
-    id: 3,
-    name: "Artisan Chai Masala",
-    description: "Experience the perfect cup of chai with our carefully crafted blend of cardamom, cinnamon, ginger, and cloves. Each sip transports you to Indian tea gardens.",
-    price: "From $22.99",
-    image: "https://images.unsplash.com/photo-1575467678930-c7acd65d6470?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
-  }
-];
-
-const fullCollection = [
-  {
-    name: "Ethiopian Berbere",
-    description: "Complex, fiery blend with over 15 spices",
-    price: "$26.99",
-    image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
-  },
-  {
-    name: "Ras el Hanout",
-    description: "Moroccan magic in every pinch",
-    price: "$28.99",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
-  },
-  {
-    name: "Five Spice Blend",
-    description: "Traditional Chinese aromatic harmony",
-    price: "$21.99",
-    image: "https://images.unsplash.com/photo-1575467678930-c7acd65d6470?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
-  },
-  {
-    name: "Premium Za'atar",
-    description: "Middle Eastern herb and spice medley",
-    price: "$18.99",
-    image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
-  }
-];
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { Product, CartItem } from "@shared/schema";
 
 export default function ProductsSection() {
+  const { toast } = useToast();
+
+  const { data: featuredProducts = [], isLoading: featuredLoading } = useQuery<Product[]>({
+    queryKey: ["/api/products/featured"],
+  });
+
+  const { data: allProducts = [], isLoading: allLoading } = useQuery<Product[]>({
+    queryKey: ["/api/products"],
+  });
+
+  const { data: cartItems = [], refetch: refetchCart } = useQuery<(CartItem & { product: Product })[]>({
+    queryKey: ["/api/cart"],
+  });
+
+  const addToCart = async (productId: string, productName: string) => {
+    try {
+      await apiRequest("POST", "/api/cart", { productId, quantity: 1 });
+      await refetchCart();
+      toast({
+        title: "Added to cart!",
+        description: `${productName} has been added to your cart`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add to cart",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getCartQuantity = (productId: string) => {
+    const cartItem = cartItems.find((item) => item.productId === productId);
+    return cartItem ? cartItem.quantity : 0;
+  };
+
+  if (featuredLoading || allLoading) {
+    return (
+      <div className="py-20 bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Featured Products Preview */}
@@ -62,20 +62,36 @@ export default function ProductsSection() {
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">Each blend tells a story of tradition, quality, and passion</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {featuredProducts.map((product, index) => (
+            {featuredProducts.slice(0, 3).map((product, index) => (
               <div key={product.id} className={`hover-lift glass-card rounded-2xl overflow-hidden shadow-lg border border-gray-200 ${index % 2 === 0 ? 'fade-in-left' : 'fade-in-right'}`}>
-                <img 
-                  src={product.image} 
-                  alt={product.name} 
-                  className="w-full h-64 object-cover"
-                />
+                <div className="relative">
+                  <img 
+                    src={`https://images.unsplash.com/photo-1596040033229-a9821ebd058d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600&q=80`} 
+                    alt={product.name} 
+                    className="w-full h-64 object-cover"
+                  />
+                  {product.featured && (
+                    <Badge className="absolute top-4 left-4 bg-spice-gold text-black font-semibold">
+                      Featured
+                    </Badge>
+                  )}
+                  {getCartQuantity(product.id) > 0 && (
+                    <Badge className="absolute top-4 right-4 bg-green-600 text-white">
+                      In Cart ({getCartQuantity(product.id)})
+                    </Badge>
+                  )}
+                </div>
                 <div className="p-6 lg:p-8">
                   <h3 className="font-display text-xl lg:text-2xl font-semibold text-white mb-3">{product.name}</h3>
                   <p className="text-gray-300 mb-4 text-sm lg:text-base">{product.description}</p>
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <span className="text-spice-gold font-semibold text-lg">{product.price}</span>
-                    <Button className="bg-spice-gold text-black px-6 py-2 rounded-full hover:bg-spice-amber transition-all duration-300 hover:transform hover:scale-105 hover-glow w-full sm:w-auto">
-                      View Details
+                    <span className="text-spice-gold font-semibold text-lg">${product.price}</span>
+                    <Button 
+                      onClick={() => addToCart(product.id, product.name)}
+                      className="bg-spice-gold text-black px-6 py-2 rounded-full hover:bg-spice-amber transition-all duration-300 hover:transform hover:scale-105 hover-glow w-full sm:w-auto flex items-center gap-2"
+                    >
+                      <ShoppingCart size={16} />
+                      Add to Cart
                     </Button>
                   </div>
                 </div>
@@ -94,24 +110,43 @@ export default function ProductsSection() {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {fullCollection.map((product, index) => (
-              <div key={index} className="hover-lift glass-card bg-gray-900/50 rounded-xl p-6 text-center fade-in border border-gray-800/50 hover-rotate">
-                <img 
-                  src={product.image} 
-                  alt={product.name} 
-                  className="w-full h-48 object-cover rounded-lg mb-4"
-                />
+            {allProducts.slice(0, 8).map((product, index) => (
+              <div key={product.id} className="hover-lift glass-card bg-gray-900/50 rounded-xl p-6 text-center fade-in border border-gray-800/50 hover-rotate relative">
+                <div className="relative mb-4">
+                  <img 
+                    src={`https://images.unsplash.com/photo-${index % 2 === 0 ? '1596040033229-a9821ebd058d' : '1506905925346-21bda4d32df4'}?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80`} 
+                    alt={product.name} 
+                    className="w-full h-48 object-cover rounded-lg"
+                  />
+                  {getCartQuantity(product.id) > 0 && (
+                    <Badge className="absolute -top-2 -right-2 bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-xs">
+                      {getCartQuantity(product.id)}
+                    </Badge>
+                  )}
+                </div>
                 <h3 className="font-display text-lg lg:text-xl font-semibold text-white mb-2">{product.name}</h3>
-                <p className="text-gray-400 text-xs lg:text-sm mb-4">{product.description}</p>
-                <span className="text-spice-gold font-bold text-lg">{product.price}</span>
+                <p className="text-gray-400 text-xs lg:text-sm mb-4 line-clamp-2">{product.description}</p>
+                <div className="flex flex-col gap-3">
+                  <span className="text-spice-gold font-bold text-lg">${product.price}</span>
+                  <Button 
+                    onClick={() => addToCart(product.id, product.name)}
+                    size="sm"
+                    className="bg-spice-gold text-black hover:bg-spice-amber transition-all duration-300 hover:transform hover:scale-105 flex items-center gap-1"
+                  >
+                    <Plus size={14} />
+                    Add to Cart
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
           
           <div className="text-center mt-12 fade-in">
-            <Button className="bg-spice-gold hover:bg-spice-amber text-black px-8 py-4 rounded-full font-semibold text-lg transition-all duration-500 hover:transform hover:scale-110 hover:shadow-2xl hover-glow">
-              View Complete Catalog
-            </Button>
+            <Link to="/store">
+              <Button className="bg-spice-gold hover:bg-spice-amber text-black px-8 py-4 rounded-full font-semibold text-lg transition-all duration-500 hover:transform hover:scale-110 hover:shadow-2xl hover-glow">
+                View Complete Catalog
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
