@@ -78,8 +78,8 @@ export default function ContactSection() {
             </p>
             
             <div className="space-y-6">
-              <div className="flex items-center">
-                <div className="bg-spice-gold p-4 rounded-full mr-6">
+              <div className="flex items-center hover-lift">
+                <div className="bg-spice-gold p-4 rounded-full mr-6 hover:scale-110 transition-all duration-300 hover-glow">
                   <Phone className="text-black h-6 w-6" />
                 </div>
                 <div>
@@ -88,8 +88,8 @@ export default function ContactSection() {
                 </div>
               </div>
               
-              <div className="flex items-center">
-                <div className="bg-spice-gold p-4 rounded-full mr-6">
+              <div className="flex items-center hover-lift">
+                <div className="bg-spice-gold p-4 rounded-full mr-6 hover:scale-110 transition-all duration-300 hover-glow">
                   <Mail className="text-black h-6 w-6" />
                 </div>
                 <div>
@@ -98,8 +98,8 @@ export default function ContactSection() {
                 </div>
               </div>
               
-              <div className="flex items-center">
-                <div className="bg-spice-gold p-4 rounded-full mr-6">
+              <div className="flex items-center hover-lift">
+                <div className="bg-spice-gold p-4 rounded-full mr-6 hover:scale-110 transition-all duration-300 hover-glow">
                   <MapPin className="text-black h-6 w-6" />
                 </div>
                 <div>
@@ -112,7 +112,7 @@ export default function ContactSection() {
           
           <div className="fade-in">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="bg-gray-50 p-8 rounded-2xl shadow-lg space-y-6 border border-gray-200">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="glass-card bg-gray-50/80 p-6 lg:p-8 rounded-2xl shadow-lg space-y-6 border border-gray-200/50 backdrop-blur-lg hover:shadow-2xl transition-all duration-300">
                 <h3 className="font-display text-2xl font-semibold text-black mb-6">Send us a message</h3>
                 
                 <FormField
@@ -198,7 +198,7 @@ export default function ContactSection() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full bg-black hover:bg-gray-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:transform hover:scale-105"
+                  className="w-full bg-black hover:bg-gray-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-500 hover:transform hover:scale-105 hover:shadow-2xl hover-glow disabled:opacity-50 disabled:hover:scale-100"
                 >
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>

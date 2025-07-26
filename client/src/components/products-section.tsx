@@ -61,20 +61,20 @@ export default function ProductsSection() {
             <h2 className="font-display text-4xl md:text-5xl font-bold text-black mb-4">Premium Spice Collection</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">Each blend tells a story of tradition, quality, and passion</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredProducts.map((product) => (
-              <div key={product.id} className="hover-lift bg-gray-50 rounded-2xl overflow-hidden shadow-lg fade-in border border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {featuredProducts.map((product, index) => (
+              <div key={product.id} className={`hover-lift glass-card rounded-2xl overflow-hidden shadow-lg border border-gray-200 ${index % 2 === 0 ? 'fade-in-left' : 'fade-in-right'}`}>
                 <img 
                   src={product.image} 
                   alt={product.name} 
                   className="w-full h-64 object-cover"
                 />
-                <div className="p-8">
-                  <h3 className="font-display text-2xl font-semibold text-black mb-3">{product.name}</h3>
-                  <p className="text-gray-600 mb-4">{product.description}</p>
-                  <div className="flex justify-between items-center">
+                <div className="p-6 lg:p-8">
+                  <h3 className="font-display text-xl lg:text-2xl font-semibold text-black mb-3">{product.name}</h3>
+                  <p className="text-gray-600 mb-4 text-sm lg:text-base">{product.description}</p>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <span className="text-spice-gold font-semibold text-lg">{product.price}</span>
-                    <Button className="bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition-colors">
+                    <Button className="bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition-all duration-300 hover:transform hover:scale-105 hover-glow w-full sm:w-auto">
                       View Details
                     </Button>
                   </div>
@@ -93,23 +93,23 @@ export default function ProductsSection() {
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">Discover our full range of premium spice blends</p>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {fullCollection.map((product, index) => (
-              <div key={index} className="hover-lift bg-gray-900 rounded-xl p-6 text-center fade-in border border-gray-800">
+              <div key={index} className="hover-lift glass-card bg-gray-900/50 rounded-xl p-6 text-center fade-in border border-gray-800/50 hover-rotate">
                 <img 
                   src={product.image} 
                   alt={product.name} 
                   className="w-full h-48 object-cover rounded-lg mb-4"
                 />
-                <h3 className="font-display text-xl font-semibold text-white mb-2">{product.name}</h3>
-                <p className="text-gray-400 text-sm mb-4">{product.description}</p>
-                <span className="text-spice-gold font-bold">{product.price}</span>
+                <h3 className="font-display text-lg lg:text-xl font-semibold text-white mb-2">{product.name}</h3>
+                <p className="text-gray-400 text-xs lg:text-sm mb-4">{product.description}</p>
+                <span className="text-spice-gold font-bold text-lg">{product.price}</span>
               </div>
             ))}
           </div>
           
-          <div className="text-center mt-12">
-            <Button className="bg-spice-gold hover:bg-spice-amber text-black px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:transform hover:scale-105">
+          <div className="text-center mt-12 fade-in">
+            <Button className="bg-spice-gold hover:bg-spice-amber text-black px-8 py-4 rounded-full font-semibold text-lg transition-all duration-500 hover:transform hover:scale-110 hover:shadow-2xl hover-glow">
               View Complete Catalog
             </Button>
           </div>

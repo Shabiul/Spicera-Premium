@@ -8,13 +8,14 @@ This is a modern, responsive website for a premium spice company called "Spicera
 
 Preferred communication style: Simple, everyday language.
 Theme preference: Black and gold color scheme for premium branding.
+Visual preferences: Apple-style glass morphism effects, advanced hover animations, fully responsive design.
 
 ## System Architecture
 
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript
 - **Routing**: Wouter (lightweight React router)
-- **Styling**: Tailwind CSS with custom color scheme for spice-themed branding
+- **Styling**: Tailwind CSS with black/gold theme and Apple-style glass morphism effects
 - **UI Components**: Radix UI components with custom shadcn/ui implementation
 - **State Management**: React Hook Form for form handling, TanStack Query for server state
 - **Build Tool**: Vite for development and production builds
@@ -29,9 +30,11 @@ Theme preference: Black and gold color scheme for premium branding.
 
 #### Frontend Structure
 - Single-page application with section-based navigation
-- Responsive design with mobile-first approach
-- Custom color scheme with spice-themed variables (browns, golds, creams)
+- Fully responsive design with mobile-first approach and glass morphism
+- Black and gold color scheme with premium glass effects and advanced animations
 - Component-based architecture with reusable UI elements
+- Advanced CSS animations: hover-lift, hover-glow, hover-rotate, fade-in variants
+- Apple-style glass cards with backdrop blur and transparency effects
 
 #### Backend Structure
 - RESTful API endpoints for contact form submissions

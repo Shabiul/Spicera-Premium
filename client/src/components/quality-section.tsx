@@ -32,12 +32,12 @@ export default function QualitySection() {
           <p className="text-xl opacity-90 max-w-2xl mx-auto">Our commitment to quality sets us apart</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {qualityPoints.map((point, index) => {
             const IconComponent = point.icon;
             return (
-              <div key={index} className="text-center fade-in">
-                <div className="bg-spice-gold p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+              <div key={index} className="text-center fade-in hover-lift">
+                <div className="bg-spice-gold p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center hover:scale-110 transition-all duration-300 hover-glow hover-rotate">
                   <IconComponent className="text-black h-8 w-8" />
                 </div>
                 <h3 className="font-display text-xl font-semibold mb-4 text-white">{point.title}</h3>

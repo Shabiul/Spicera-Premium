@@ -16,7 +16,7 @@ export default function Home() {
     link1.rel = 'stylesheet';
     document.head.appendChild(link1);
 
-    // Fade in animation on scroll
+    // Enhanced fade in animations on scroll
     const observerOptions = {
       threshold: 0.1,
       rootMargin: '0px 0px -50px 0px'
@@ -30,7 +30,8 @@ export default function Home() {
       });
     }, observerOptions);
 
-    document.querySelectorAll('.fade-in').forEach(el => {
+    // Observe all animation classes
+    document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right').forEach(el => {
       observer.observe(el);
     });
 

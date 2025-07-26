@@ -33,9 +33,9 @@ export default function TestimonialsSection() {
           <p className="text-xl text-gray-600">Hear from our satisfied customers</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {testimonials.map((testimonial, index) => (
-            <div key={index} className="bg-gray-50 p-8 rounded-2xl fade-in border border-gray-200">
+            <div key={index} className="glass-card bg-gray-50/80 p-6 lg:p-8 rounded-2xl fade-in border border-gray-200/50 hover-lift hover:shadow-2xl transition-all duration-300 backdrop-blur-sm">
               <div className="flex items-center mb-4">
                 <div className="text-spice-gold flex">
                   {[...Array(testimonial.rating)].map((_, i) => (
@@ -45,7 +45,7 @@ export default function TestimonialsSection() {
               </div>
               <p className="text-gray-700 mb-6 italic">"{testimonial.content}"</p>
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-spice-gold rounded-full flex items-center justify-center mr-4">
+                <div className="w-12 h-12 bg-spice-gold rounded-full flex items-center justify-center mr-4 hover:scale-110 transition-all duration-300 hover-glow">
                   <span className="font-semibold text-black">{testimonial.initials}</span>
                 </div>
                 <div>
