@@ -190,7 +190,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalAmount: totalAmount.toString(),
       };
 
-      const orderItems: InsertOrderItem[] = cartItems.map(item => ({
+      const orderItems = cartItems.map(item => ({
         productId: item.productId,
         quantity: item.quantity,
         unitPrice: item.product.price,
