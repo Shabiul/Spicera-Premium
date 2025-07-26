@@ -10,6 +10,7 @@ Preferred communication style: Simple, everyday language.
 Theme preference: Black and gold color scheme for premium branding.
 Visual preferences: Apple-style glass morphism effects, advanced hover animations, fully responsive design.
 Pricing preference: Indian Rupees (₹) currency with all products priced at ₹100 each.
+Product catalog: Currently delivering only 4 specific masala products - Biryani Masala, Korma Masala, Garam Masala, and Kitchen King Masala.
 
 ## System Architecture
 
