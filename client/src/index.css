@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+  
+  /* Spice-specific colors */
+  --spice-brown: hsl(21, 75%, 32%);
+  --spice-chocolate: hsl(25, 61%, 47%);
+  --spice-gold: hsl(43, 69%, 49%);
+  --spice-cream: hsl(48, 67%, 94%);
+  --spice-dark: hsl(21, 56%, 13%);
+  --spice-orange: hsl(19, 100%, 63%);
+  --spice-amber: hsl(45, 100%, 50%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+@layer utilities {
+  .parallax-bg {
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  @media (max-width: 768px) {
+    .parallax-bg {
+      background-attachment: scroll;
+    }
+  }
+
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .text-spice-brown {
+    color: var(--spice-brown);
+  }
+
+  .text-spice-chocolate {
+    color: var(--spice-chocolate);
+  }
+
+  .text-spice-gold {
+    color: var(--spice-gold);
+  }
+
+  .text-spice-dark {
+    color: var(--spice-dark);
+  }
+
+  .text-spice-orange {
+    color: var(--spice-orange);
+  }
+
+  .bg-spice-brown {
+    background-color: var(--spice-brown);
+  }
+
+  .bg-spice-chocolate {
+    background-color: var(--spice-chocolate);
+  }
+
+  .bg-spice-gold {
+    background-color: var(--spice-gold);
+  }
+
+  .bg-spice-cream {
+    background-color: var(--spice-cream);
+  }
+
+  .bg-spice-dark {
+    background-color: var(--spice-dark);
+  }
+
+  .bg-spice-orange {
+    background-color: var(--spice-orange);
+  }
+
+  .bg-spice-amber {
+    background-color: var(--spice-amber);
+  }
+
+  .border-spice-gold {
+    border-color: var(--spice-gold);
+  }
+
+  .hover\:bg-spice-dark:hover {
+    background-color: var(--spice-dark);
+  }
+
+  .hover\:bg-spice-amber:hover {
+    background-color: var(--spice-amber);
+  }
+
+  .hover\:text-spice-brown:hover {
+    color: var(--spice-brown);
+  }
+
+  .hover\:text-spice-gold:hover {
+    color: var(--spice-gold);
+  }
+
+  .focus\:ring-spice-gold:focus {
+    --tw-ring-color: var(--spice-gold);
+  }
+
+  .font-display {
+    font-family: 'Playfair Display', serif;
+  }
+
+  .font-body {
+    font-family: 'Inter', sans-serif;
+  }
+}
