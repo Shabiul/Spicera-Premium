@@ -59,7 +59,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="font-body text-black bg-white">
+    <div className="font-body text-white bg-black min-h-screen">
       <Navigation />
       <HeroSection />
       <ProductsSection />

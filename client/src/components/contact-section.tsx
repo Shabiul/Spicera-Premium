@@ -68,12 +68,12 @@ export default function ContactSection() {
   };
 
   return (
-    <section id="contact" className="py-20 bg-white">
+    <section id="contact" className="py-20 bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           <div className="fade-in">
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-black mb-6">Get In Touch</h2>
-            <p className="text-lg text-gray-700 mb-8">
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-6">Get In Touch</h2>
+            <p className="text-lg text-gray-300 mb-8">
               Ready to elevate your culinary experience? Contact us for custom blends, bulk orders, or any questions about our premium spices.
             </p>
             
@@ -83,8 +83,8 @@ export default function ContactSection() {
                   <Phone className="text-black h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-black text-lg">Phone</h4>
-                  <p className="text-gray-600">+1 (555) 123-SPICE</p>
+                  <h4 className="font-semibold text-white text-lg">Phone</h4>
+                  <p className="text-gray-300">+1 (555) 123-SPICE</p>
                 </div>
               </div>
               
@@ -93,8 +93,8 @@ export default function ContactSection() {
                   <Mail className="text-black h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-black text-lg">Email</h4>
-                  <p className="text-gray-600">hello@spicerapremium.com</p>
+                  <h4 className="font-semibold text-white text-lg">Email</h4>
+                  <p className="text-gray-300">hello@spicerapremium.com</p>
                 </div>
               </div>
               
@@ -103,8 +103,8 @@ export default function ContactSection() {
                   <MapPin className="text-black h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-black text-lg">Location</h4>
-                  <p className="text-gray-600">Artisan District, Portland, OR</p>
+                  <h4 className="font-semibold text-white text-lg">Location</h4>
+                  <p className="text-gray-300">Artisan District, Portland, OR</p>
                 </div>
               </div>
             </div>
@@ -112,8 +112,8 @@ export default function ContactSection() {
           
           <div className="fade-in">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="glass-card bg-gray-50/80 p-6 lg:p-8 rounded-2xl shadow-lg space-y-6 border border-gray-200/50 backdrop-blur-lg hover:shadow-2xl transition-all duration-300">
-                <h3 className="font-display text-2xl font-semibold text-black mb-6">Send us a message</h3>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="glass-card bg-gray-800/50 p-6 lg:p-8 rounded-2xl shadow-lg space-y-6 border border-gray-600/30 backdrop-blur-lg hover:shadow-2xl transition-all duration-300">
+                <h3 className="font-display text-2xl font-semibold text-white mb-6">Send us a message</h3>
                 
                 <FormField
                   control={form.control}
@@ -198,7 +198,7 @@ export default function ContactSection() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full bg-black hover:bg-gray-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-500 hover:transform hover:scale-105 hover:shadow-2xl hover-glow disabled:opacity-50 disabled:hover:scale-100"
+                  className="w-full bg-spice-gold hover:bg-spice-amber text-black px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-500 hover:transform hover:scale-105 hover:shadow-2xl hover-glow disabled:opacity-50 disabled:hover:scale-100"
                 >
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
