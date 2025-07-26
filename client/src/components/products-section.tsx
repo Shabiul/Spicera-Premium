@@ -58,23 +58,23 @@ export default function ProductsSection() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 fade-in">
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-spice-brown mb-4">Premium Spice Collection</h2>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-black mb-4">Premium Spice Collection</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">Each blend tells a story of tradition, quality, and passion</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {featuredProducts.map((product) => (
-              <div key={product.id} className="hover-lift bg-spice-cream rounded-2xl overflow-hidden shadow-lg fade-in">
+              <div key={product.id} className="hover-lift bg-gray-50 rounded-2xl overflow-hidden shadow-lg fade-in border border-gray-200">
                 <img 
                   src={product.image} 
                   alt={product.name} 
                   className="w-full h-64 object-cover"
                 />
                 <div className="p-8">
-                  <h3 className="font-display text-2xl font-semibold text-spice-brown mb-3">{product.name}</h3>
+                  <h3 className="font-display text-2xl font-semibold text-black mb-3">{product.name}</h3>
                   <p className="text-gray-600 mb-4">{product.description}</p>
                   <div className="flex justify-between items-center">
                     <span className="text-spice-gold font-semibold text-lg">{product.price}</span>
-                    <Button className="bg-spice-brown text-white px-6 py-2 rounded-full hover:bg-spice-dark transition-colors">
+                    <Button className="bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition-colors">
                       View Details
                     </Button>
                   </div>
@@ -86,30 +86,30 @@ export default function ProductsSection() {
       </section>
 
       {/* Complete Products Showcase */}
-      <section id="products" className="py-20 bg-white">
+      <section id="products" className="py-20 bg-black text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 fade-in">
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-spice-brown mb-4">Complete Collection</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Discover our full range of premium spice blends</p>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-spice-gold mb-4">Complete Collection</h2>
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">Discover our full range of premium spice blends</p>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {fullCollection.map((product, index) => (
-              <div key={index} className="hover-lift bg-spice-cream rounded-xl p-6 text-center fade-in">
+              <div key={index} className="hover-lift bg-gray-900 rounded-xl p-6 text-center fade-in border border-gray-800">
                 <img 
                   src={product.image} 
                   alt={product.name} 
                   className="w-full h-48 object-cover rounded-lg mb-4"
                 />
-                <h3 className="font-display text-xl font-semibold text-spice-brown mb-2">{product.name}</h3>
-                <p className="text-gray-600 text-sm mb-4">{product.description}</p>
+                <h3 className="font-display text-xl font-semibold text-white mb-2">{product.name}</h3>
+                <p className="text-gray-400 text-sm mb-4">{product.description}</p>
                 <span className="text-spice-gold font-bold">{product.price}</span>
               </div>
             ))}
           </div>
           
           <div className="text-center mt-12">
-            <Button className="bg-spice-brown hover:bg-spice-dark text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:transform hover:scale-105">
+            <Button className="bg-spice-gold hover:bg-spice-amber text-black px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:transform hover:scale-105">
               View Complete Catalog
             </Button>
           </div>

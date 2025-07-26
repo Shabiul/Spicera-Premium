@@ -24,14 +24,14 @@
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
   
-  /* Spice-specific colors */
-  --spice-brown: hsl(21, 75%, 32%);
-  --spice-chocolate: hsl(25, 61%, 47%);
-  --spice-gold: hsl(43, 69%, 49%);
-  --spice-cream: hsl(48, 67%, 94%);
-  --spice-dark: hsl(21, 56%, 13%);
-  --spice-orange: hsl(19, 100%, 63%);
-  --spice-amber: hsl(45, 100%, 50%);
+  /* Black and Gold theme colors */
+  --spice-brown: hsl(0, 0%, 0%);
+  --spice-chocolate: hsl(0, 0%, 15%);
+  --spice-gold: hsl(45, 100%, 50%);
+  --spice-cream: hsl(0, 0%, 98%);
+  --spice-dark: hsl(0, 0%, 0%);
+  --spice-orange: hsl(45, 100%, 50%);
+  --spice-amber: hsl(45, 100%, 60%);
 }
 
 .dark {

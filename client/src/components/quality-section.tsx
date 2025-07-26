@@ -25,10 +25,10 @@ const qualityPoints = [
 
 export default function QualitySection() {
   return (
-    <section id="quality" className="py-20 bg-gradient-to-br from-spice-brown to-spice-chocolate text-white">
+    <section id="quality" className="py-20 bg-gradient-to-br from-black to-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16 fade-in">
-          <h2 className="font-display text-4xl md:text-5xl font-bold mb-4">Why Choose Spicera Premium</h2>
+          <h2 className="font-display text-4xl md:text-5xl font-bold mb-4 text-spice-gold">Why Choose Spicera Premium</h2>
           <p className="text-xl opacity-90 max-w-2xl mx-auto">Our commitment to quality sets us apart</p>
         </div>
         
@@ -38,9 +38,9 @@ export default function QualitySection() {
             return (
               <div key={index} className="text-center fade-in">
                 <div className="bg-spice-gold p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-                  <IconComponent className="text-spice-dark h-8 w-8" />
+                  <IconComponent className="text-black h-8 w-8" />
                 </div>
-                <h3 className="font-display text-xl font-semibold mb-4">{point.title}</h3>
+                <h3 className="font-display text-xl font-semibold mb-4 text-white">{point.title}</h3>
                 <p className="opacity-90">{point.description}</p>
               </div>
             );

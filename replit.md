@@ -7,6 +7,7 @@ This is a modern, responsive website for a premium spice company called "Spicera
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Theme preference: Black and gold color scheme for premium branding.
 
 ## System Architecture
 

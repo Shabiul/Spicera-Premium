@@ -58,7 +58,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="font-body text-spice-dark bg-spice-cream">
+    <div className="font-body text-black bg-white">
       <Navigation />
       <HeroSection />
       <ProductsSection />

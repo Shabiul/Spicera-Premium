@@ -7,7 +7,7 @@ export default function HeroSection() {
       id="home" 
       className="relative h-screen flex items-center justify-center parallax-bg"
       style={{
-        backgroundImage: `linear-gradient(rgba(47, 27, 20, 0.4), rgba(139, 69, 19, 0.3)), url('https://images.unsplash.com/photo-1596040033229-a9821ebd058d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80')`
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1596040033229-a9821ebd058d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80')`
       }}
     >
       <div className="text-center text-white max-w-4xl mx-auto px-4">
@@ -19,14 +19,14 @@ export default function HeroSection() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button 
-            className="bg-spice-gold hover:bg-spice-amber text-spice-dark px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:transform hover:scale-105"
+            className="bg-spice-gold hover:bg-spice-amber text-black px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:transform hover:scale-105"
             onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
           >
             Explore Our Collection
           </Button>
           <Button 
             variant="outline"
-            className="border-2 border-white text-white hover:bg-white hover:text-spice-dark px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300"
+            className="border-2 border-spice-gold text-spice-gold hover:bg-spice-gold hover:text-black px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300"
             onClick={() => document.getElementById('story')?.scrollIntoView({ behavior: 'smooth' })}
           >
             Learn Our Story
@@ -34,7 +34,7 @@ export default function HeroSection() {
         </div>
       </div>
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <ChevronDown className="text-white text-2xl h-8 w-8" />
+        <ChevronDown className="text-spice-gold text-2xl h-8 w-8" />
       </div>
     </section>
   );

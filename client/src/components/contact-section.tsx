@@ -68,11 +68,11 @@ export default function ContactSection() {
   };
 
   return (
-    <section id="contact" className="py-20 bg-gradient-to-br from-spice-cream to-white">
+    <section id="contact" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           <div className="fade-in">
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-spice-brown mb-6">Get In Touch</h2>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-black mb-6">Get In Touch</h2>
             <p className="text-lg text-gray-700 mb-8">
               Ready to elevate your culinary experience? Contact us for custom blends, bulk orders, or any questions about our premium spices.
             </p>
@@ -80,30 +80,30 @@ export default function ContactSection() {
             <div className="space-y-6">
               <div className="flex items-center">
                 <div className="bg-spice-gold p-4 rounded-full mr-6">
-                  <Phone className="text-spice-dark h-6 w-6" />
+                  <Phone className="text-black h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-spice-brown text-lg">Phone</h4>
+                  <h4 className="font-semibold text-black text-lg">Phone</h4>
                   <p className="text-gray-600">+1 (555) 123-SPICE</p>
                 </div>
               </div>
               
               <div className="flex items-center">
                 <div className="bg-spice-gold p-4 rounded-full mr-6">
-                  <Mail className="text-spice-dark h-6 w-6" />
+                  <Mail className="text-black h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-spice-brown text-lg">Email</h4>
+                  <h4 className="font-semibold text-black text-lg">Email</h4>
                   <p className="text-gray-600">hello@spicerapremium.com</p>
                 </div>
               </div>
               
               <div className="flex items-center">
                 <div className="bg-spice-gold p-4 rounded-full mr-6">
-                  <MapPin className="text-spice-dark h-6 w-6" />
+                  <MapPin className="text-black h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-spice-brown text-lg">Location</h4>
+                  <h4 className="font-semibold text-black text-lg">Location</h4>
                   <p className="text-gray-600">Artisan District, Portland, OR</p>
                 </div>
               </div>
@@ -112,8 +112,8 @@ export default function ContactSection() {
           
           <div className="fade-in">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="bg-white p-8 rounded-2xl shadow-lg space-y-6">
-                <h3 className="font-display text-2xl font-semibold text-spice-brown mb-6">Send us a message</h3>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="bg-gray-50 p-8 rounded-2xl shadow-lg space-y-6 border border-gray-200">
+                <h3 className="font-display text-2xl font-semibold text-black mb-6">Send us a message</h3>
                 
                 <FormField
                   control={form.control}
@@ -198,7 +198,7 @@ export default function ContactSection() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full bg-spice-brown hover:bg-spice-dark text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:transform hover:scale-105"
+                  className="w-full bg-black hover:bg-gray-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:transform hover:scale-105"
                 >
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
