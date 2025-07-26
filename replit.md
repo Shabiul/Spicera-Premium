@@ -9,6 +9,7 @@ This is a modern, responsive website for a premium spice company called "Spicera
 Preferred communication style: Simple, everyday language.
 Theme preference: Black and gold color scheme for premium branding.
 Visual preferences: Apple-style glass morphism effects, advanced hover animations, fully responsive design.
+Pricing preference: Indian Rupees (₹) currency with all products priced at ₹100 each.
 
 ## System Architecture
 

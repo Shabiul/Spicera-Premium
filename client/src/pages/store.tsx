@@ -126,7 +126,7 @@ export default function Store() {
                   
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-2xl font-bold text-amber-400">
-                      ${parseFloat(product.price).toFixed(2)}
+                      ₹{parseFloat(product.price).toFixed(0)}
                     </span>
                     <span className="text-sm text-gray-500">
                       {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}

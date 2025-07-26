@@ -83,7 +83,7 @@ export default function ProductsSection() {
                 <h3 className="text-xl font-bold text-white mb-2">{product.name}</h3>
                 <p className="text-gray-300 mb-4 text-sm">{product.description}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-yellow-500 font-bold text-lg">${product.price}</span>
+                  <span className="text-yellow-500 font-bold text-lg">₹{product.price}</span>
                   <Button 
                     onClick={() => addToCart(product.id, product.name)}
                     className="bg-yellow-500 text-black hover:bg-yellow-600 px-4 py-2 rounded flex items-center gap-2"
@@ -124,7 +124,7 @@ export default function ProductsSection() {
                 <h3 className="text-lg font-bold text-white mb-2">{product.name}</h3>
                 <p className="text-gray-400 text-xs mb-3">{product.description.slice(0, 80)}...</p>
                 <div className="flex flex-col gap-2">
-                  <span className="text-yellow-500 font-bold">${product.price}</span>
+                  <span className="text-yellow-500 font-bold">₹{product.price}</span>
                   <Button 
                     onClick={() => addToCart(product.id, product.name)}
                     size="sm"

@@ -89,7 +89,7 @@ export default function Checkout() {
     sum + (parseFloat(item.product.price) * item.quantity), 0
   );
 
-  const shipping = subtotal > 50 ? 0 : 9.99;
+  const shipping = subtotal > 500 ? 0 : 50;
   const total = subtotal + shipping;
 
   if (isLoading) {
@@ -265,7 +265,7 @@ export default function Checkout() {
                         <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
                       </div>
                       <div className="text-sm font-medium text-amber-400">
-                        ${(parseFloat(item.product.price) * item.quantity).toFixed(2)}
+                        ₹{(parseFloat(item.product.price) * item.quantity).toFixed(0)}
                       </div>
                     </div>
                   ))}
@@ -274,23 +274,23 @@ export default function Checkout() {
                 <div className="space-y-2 pt-4 border-t border-gray-700">
                   <div className="flex justify-between text-gray-300">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>₹{subtotal.toFixed(0)}</span>
                   </div>
                   <div className="flex justify-between text-gray-300">
                     <span>Shipping</span>
                     <span className={shipping === 0 ? "text-green-500" : ""}>
-                      {shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}
+                      {shipping === 0 ? "FREE" : `₹${shipping.toFixed(0)}`}
                     </span>
                   </div>
-                  {subtotal < 50 && shipping > 0 && (
+                  {subtotal < 500 && shipping > 0 && (
                     <p className="text-xs text-gray-500">
-                      Free shipping on orders over $50
+                      Free shipping on orders over ₹500
                     </p>
                   )}
                   <div className="border-t border-gray-700 pt-2">
                     <div className="flex justify-between text-lg font-semibold text-white">
                       <span>Total</span>
-                      <span className="text-amber-400">${total.toFixed(2)}</span>
+                      <span className="text-amber-400">₹{total.toFixed(0)}</span>
                     </div>
                   </div>
                 </div>

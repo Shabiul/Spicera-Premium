@@ -219,10 +219,10 @@ export default function Cart() {
                     
                     <div className="text-right">
                       <div className="text-lg font-semibold text-amber-400">
-                        ${(parseFloat(item.product.price) * item.quantity).toFixed(2)}
+                        ₹{(parseFloat(item.product.price) * item.quantity).toFixed(0)}
                       </div>
                       <div className="text-sm text-gray-500">
-                        ${parseFloat(item.product.price).toFixed(2)} each
+                        ₹{parseFloat(item.product.price).toFixed(0)} each
                       </div>
                     </div>
                   </div>
@@ -240,23 +240,23 @@ export default function Cart() {
               <CardContent className="space-y-4">
                 <div className="flex justify-between text-gray-300">
                   <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>₹{subtotal.toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-gray-300">
                   <span>Shipping</span>
                   <span className={shipping === 0 ? "text-green-500" : ""}>
-                    {shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}
+                    {shipping === 0 ? "FREE" : `₹${shipping.toFixed(0)}`}
                   </span>
                 </div>
-                {subtotal < 50 && shipping > 0 && (
+                {subtotal < 500 && shipping > 0 && (
                   <p className="text-sm text-gray-500">
-                    Free shipping on orders over $50
+                    Free shipping on orders over ₹500
                   </p>
                 )}
                 <div className="border-t border-gray-700 pt-4">
                   <div className="flex justify-between text-lg font-semibold text-white">
                     <span>Total</span>
-                    <span className="text-amber-400">${total.toFixed(2)}</span>
+                    <span className="text-amber-400">₹{total.toFixed(0)}</span>
                   </div>
                 </div>
                 <Link to="/checkout">
