@@ -39,22 +39,62 @@ npm run dev
    ```bash
    npm install
    ```
-3. Set up your database (if using PostgreSQL):
+3. Set up your environment variables:
+   ```bash
+   # Copy the example file and modify it
+   cp .env.example .env
+   # Edit .env with your actual database credentials
+   ```
+4. Set up your PostgreSQL database:
+   
+   **Option A: Using the SQL file directly**
+   ```bash
+   # Run the SQL setup file in your PostgreSQL database
+   psql -U your_username -d your_database -f database-setup.sql
+   ```
+   
+   **Option B: Using the Node.js setup script**
+   ```bash
+   # Make sure your .env file is configured, then run:
+   node setup-database.js
+   ```
+   
+   **Option C: Using Drizzle (for schema only, no initial data)**
    ```bash
    npm run db:push
    ```
-4. Start the development server:
+
+5. Start the development server:
    ```bash
    npm run dev
    ```
+
+### Database Setup Files
+
+This project includes several database setup files:
+
+- **`database-setup.sql`** - Complete SQL script that creates all tables and inserts the 4 masala products
+- **`setup-database.js`** - Node.js script to run the SQL setup programmatically
+- **`.env.example`** - Template for environment variables
 
 ### Environment Variables
 
 Create a `.env` file in the root directory with:
 
 ```
-DATABASE_URL=your_database_url_here
-SESSION_SECRET=your_session_secret_here
+# Database Configuration
+DATABASE_URL=postgresql://username:password@localhost:5432/spicera_db
+
+# PostgreSQL Connection Details
+PGHOST=localhost
+PGPORT=5432
+PGUSER=your_username
+PGPASSWORD=your_password
+PGDATABASE=spicera_db
+
+# Application Configuration
+SESSION_SECRET=your-secure-session-secret
+NODE_ENV=development
 ```
 
 ### Project Structure
