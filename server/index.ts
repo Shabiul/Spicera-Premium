@@ -36,6 +36,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// Add global error handlers for unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+});
+
 (async () => {
   const server = await registerRoutes(app);
 

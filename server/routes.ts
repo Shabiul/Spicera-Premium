@@ -68,6 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const products = await storage.getProducts();
       res.json(products);
     } catch (error: any) {
+      console.error("Error fetching products:", error);
       res.status(500).json({ error: "Failed to fetch products" });
     }
   });
@@ -77,6 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const products = await storage.getFeaturedProducts();
       res.json(products);
     } catch (error: any) {
+      console.error("Error fetching featured products:", error);
       res.status(500).json({ error: "Failed to fetch featured products" });
     }
   });
@@ -110,6 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cartItems = await storage.getCartItems(sessionId);
       res.json(cartItems);
     } catch (error: any) {
+      console.error("Error fetching cart items:", error);
       res.status(500).json({ error: "Failed to fetch cart items" });
     }
   });
