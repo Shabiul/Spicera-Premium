@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { ShoppingCart, Plus, Minus } from "lucide-react";
+import { ShoppingCart, Plus, Minus, X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import type { Product } from "@shared/schema";
+import type { Product, CartItem } from "@shared/schema";
 
 export default function Store() {
   const { toast } = useToast();
@@ -16,7 +17,7 @@ export default function Store() {
     queryKey: ["/api/products"],
   });
 
-  const { data: cartItems = [], refetch: refetchCart } = useQuery({
+  const { data: cartItems = [], refetch: refetchCart } = useQuery<(CartItem & { product: Product })[]>({
     queryKey: ["/api/cart"],
   });
 
@@ -43,6 +44,34 @@ export default function Store() {
     }
   };
 
+  const updateCartQuantity = async (productId: string, quantity: number) => {
+    try {
+      const cartItem = cartItems.find(item => item.productId === productId);
+      if (!cartItem) return;
+
+      if (quantity <= 0) {
+        await apiRequest("DELETE", `/api/cart/${cartItem.id}`, {});
+      } else {
+        await apiRequest("PUT", `/api/cart/${cartItem.id}`, { quantity });
+      }
+      await refetchCart();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update cart",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getTotalItems = () => {
+    return cartItems.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  const getTotalPrice = () => {
+    return cartItems.reduce((total, item) => total + (item.quantity * parseFloat(item.product.price)), 0);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -52,7 +81,7 @@ export default function Store() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white relative">
       {/* Header */}
       <div className="bg-gradient-to-r from-black via-gray-900 to-black py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -153,6 +182,74 @@ export default function Store() {
           </div>
         )}
       </div>
+
+      {/* Floating Cart Widget */}
+      {cartItems.length > 0 && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <Card className="bg-gray-900/95 border-amber-500/50 backdrop-blur-sm shadow-2xl shadow-amber-500/20 max-w-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <ShoppingCart size={20} className="text-amber-500" />
+                  Cart ({getTotalItems()})
+                </h3>
+                <Link to="/cart">
+                  <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-black">
+                    View Cart
+                  </Button>
+                </Link>
+              </div>
+              
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {cartItems.slice(0, 3).map((item) => (
+                  <div key={item.id} className="flex items-center justify-between text-sm bg-gray-800/50 rounded p-2">
+                    <div className="flex-1">
+                      <p className="text-white font-medium">{item.product.name}</p>
+                      <p className="text-gray-400">₹{parseFloat(item.product.price).toFixed(0)} each</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 w-6 p-0 border-gray-600 hover:bg-gray-700"
+                        onClick={() => updateCartQuantity(item.productId, item.quantity - 1)}
+                      >
+                        <Minus size={12} />
+                      </Button>
+                      <span className="text-white mx-2 min-w-[20px] text-center">{item.quantity}</span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 w-6 p-0 border-gray-600 hover:bg-gray-700"
+                        onClick={() => updateCartQuantity(item.productId, item.quantity + 1)}
+                      >
+                        <Plus size={12} />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {cartItems.length > 3 && (
+                  <p className="text-gray-400 text-xs text-center">
+                    +{cartItems.length - 3} more items
+                  </p>
+                )}
+              </div>
+              
+              <div className="border-t border-gray-700 pt-3 mt-3">
+                <div className="flex justify-between items-center text-white font-bold">
+                  <span>Total:</span>
+                  <span className="text-amber-400">₹{getTotalPrice().toFixed(0)}</span>
+                </div>
+                <Link to="/checkout" className="block mt-2">
+                  <Button className="w-full bg-amber-500 hover:bg-amber-600 text-black font-semibold">
+                    Checkout
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
