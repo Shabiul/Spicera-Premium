@@ -10,7 +10,7 @@ export const contactSubmissions = pgTable("contact_submissions", {
   email: text("email").notNull(),
   subject: text("subject").notNull(),
   message: text("message").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("createdat").defaultNow().notNull(),
 });
 
 export const insertContactSubmissionSchema = createInsertSchema(contactSubmissions).omit({
@@ -31,41 +31,41 @@ export const products = pgTable("products", {
   category: text("category").notNull(),
   stock: integer("stock").notNull().default(0),
   featured: boolean("featured").default(false),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("createdat").defaultNow().notNull(),
+  updatedAt: timestamp("updatedat").defaultNow().notNull(),
 });
 
 // Shopping cart table
 export const cartItems = pgTable("cart_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  sessionId: text("session_id").notNull(),
-  productId: varchar("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+  sessionId: text("sessionid").notNull(),
+  productId: varchar("productid").notNull().references(() => products.id, { onDelete: "cascade" }),
   quantity: integer("quantity").notNull().default(1),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("createdat").defaultNow().notNull(),
+  updatedAt: timestamp("updatedat").defaultNow().notNull(),
 });
 
 // Orders table
 export const orders = pgTable("orders", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  customerName: text("customer_name").notNull(),
-  customerEmail: text("customer_email").notNull(),
-  customerPhone: text("customer_phone"),
-  shippingAddress: text("shipping_address").notNull(),
-  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  customerName: text("customername").notNull(),
+  customerEmail: text("customeremail").notNull(),
+  customerPhone: text("customerphone"),
+  shippingAddress: text("shippingaddress").notNull(),
+  totalAmount: decimal("totalamount", { precision: 10, scale: 2 }).notNull(),
   status: text("status").notNull().default("pending"), // pending, confirmed, shipped, delivered, cancelled
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("createdat").defaultNow().notNull(),
+  updatedAt: timestamp("updatedat").defaultNow().notNull(),
 });
 
 // Order items table
 export const orderItems = pgTable("order_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  orderId: varchar("order_id").notNull().references(() => orders.id, { onDelete: "cascade" }),
-  productId: varchar("product_id").notNull().references(() => products.id),
+  orderId: varchar("orderid").notNull().references(() => orders.id, { onDelete: "cascade" }),
+  productId: varchar("productid").notNull().references(() => products.id),
   quantity: integer("quantity").notNull(),
-  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
-  totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
+  unitPrice: decimal("unitprice", { precision: 10, scale: 2 }).notNull(),
+  totalPrice: decimal("totalprice", { precision: 10, scale: 2 }).notNull(),
 });
 
 // Relations

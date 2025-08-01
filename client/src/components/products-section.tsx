@@ -67,10 +67,10 @@ export default function ProductsSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {allProducts.map((product, index) => {
             const spiceImages = [
-              'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80', // Biryani
-              'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80', // Korma  
-              'https://images.unsplash.com/photo-1599909533436-5895c22a8cd0?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80', // Garam
-              'https://images.unsplash.com/photo-1506368249639-73a05d6f6488?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80'  // Kitchen King
+              '/src/assets/images/spices/biryani-masala.jpg', // Biryani
+              '/src/assets/images/spices/korma-masala.jpg', // Korma  
+              '/src/assets/images/spices/GARAM-MASALA.jpeg', // Garam
+              '/src/assets/images/spices/KITCHEN-KING.jpeg'  // Kitchen King
             ];
             
             return (

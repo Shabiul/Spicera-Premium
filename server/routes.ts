@@ -9,6 +9,7 @@ import {
   insertOrderItemSchema,
   type InsertOrderItem 
 } from "@shared/schema";
+import { sendOrderConfirmationEmail } from './email-service';
 import { z } from "zod";
 
 function getSessionId(req: any): string {
@@ -201,6 +202,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       })) as Omit<InsertOrderItem, 'id'>[];
 
       const order = await storage.createOrder(orderData, orderItems);
+      
+      // Send order confirmation email
+      try {
+        await sendOrderConfirmationEmail({
+          order,
+          cartItems
+        });
+      } catch (emailError) {
+        console.error('Email sending failed:', emailError);
+        // Continue with order creation even if email fails
+      }
       
       // Clear cart after successful order
       await storage.clearCart(sessionId);

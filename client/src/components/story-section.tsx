@@ -36,7 +36,7 @@ export default function StorySection() {
           </div>
           <div className="fade-in">
             <img 
-              src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+              src="/src/assets/images/spices/GARAM-MASALA.jpeg" 
               alt="Traditional spice preparation" 
               className="rounded-2xl shadow-2xl w-full"
             />

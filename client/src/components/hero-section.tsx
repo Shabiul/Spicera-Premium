@@ -7,7 +7,7 @@ export default function HeroSection() {
       id="home" 
       className="relative h-screen flex items-center justify-center parallax-bg"
       style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1596040033229-a9821ebd058d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80')`
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)), url('/src/assets/images/spices/biryani-masala.jpg')`
       }}
     >
       <div className="text-center text-white max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
