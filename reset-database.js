@@ -33,6 +33,7 @@ async function resetDatabase() {
       DROP TABLE IF EXISTS orders CASCADE;
       DROP TABLE IF EXISTS cart_items CASCADE;
       DROP TABLE IF EXISTS products CASCADE;
+      DROP TABLE IF EXISTS users CASCADE;
       DROP TABLE IF EXISTS contact_submissions CASCADE;
     `);
     

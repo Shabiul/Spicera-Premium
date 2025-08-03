@@ -14,6 +14,19 @@ CREATE TABLE IF NOT EXISTS contact_submissions (
     createdat TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
+-- Create users table
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    phone TEXT,
+    address TEXT,
+    role TEXT NOT NULL DEFAULT 'user',
+    createdat TIMESTAMP DEFAULT NOW() NOT NULL,
+    updatedat TIMESTAMP DEFAULT NOW() NOT NULL
+);
+
 -- Create products table
 CREATE TABLE IF NOT EXISTS products (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -31,17 +44,24 @@ CREATE TABLE IF NOT EXISTS products (
 -- Create cart_items table
 CREATE TABLE IF NOT EXISTS cart_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    sessionid TEXT NOT NULL,
+    sessionid TEXT,
+    userid UUID,
     productid UUID NOT NULL,
     quantity INTEGER NOT NULL DEFAULT 1,
     createdat TIMESTAMP DEFAULT NOW() NOT NULL,
     updatedat TIMESTAMP DEFAULT NOW() NOT NULL,
-    FOREIGN KEY (productid) REFERENCES products(id) ON DELETE CASCADE
+    FOREIGN KEY (productid) REFERENCES products(id) ON DELETE CASCADE,
+    FOREIGN KEY (userid) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT cart_items_session_or_user CHECK (
+        (sessionid IS NOT NULL AND userid IS NULL) OR 
+        (sessionid IS NULL AND userid IS NOT NULL)
+    )
 );
 
 -- Create orders table
 CREATE TABLE IF NOT EXISTS orders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    userid UUID,
     customername TEXT NOT NULL,
     customeremail TEXT NOT NULL,
     customerphone TEXT,
@@ -49,7 +69,8 @@ CREATE TABLE IF NOT EXISTS orders (
     totalamount DECIMAL(10, 2) NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending',
     createdat TIMESTAMP DEFAULT NOW() NOT NULL,
-    updatedat TIMESTAMP DEFAULT NOW() NOT NULL
+    updatedat TIMESTAMP DEFAULT NOW() NOT NULL,
+    FOREIGN KEY (userid) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Create order_items table
@@ -65,13 +86,16 @@ CREATE TABLE IF NOT EXISTS order_items (
 );
 
 -- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_cart_items_session_id ON cart_items(sessionid);
+CREATE INDEX IF NOT EXISTS idx_cart_items_user_id ON cart_items(userid);
 CREATE INDEX IF NOT EXISTS idx_cart_items_product_id ON cart_items(productid);
 
 CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(orderid);
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
 CREATE INDEX IF NOT EXISTS idx_products_featured ON products(featured);
 CREATE INDEX IF NOT EXISTS idx_orders_customer_email ON orders(customeremail);
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(userid);
 
 -- Insert initial product data (4 premium masala products)
 -- Only insert if products don't already exist
@@ -138,6 +162,10 @@ CREATE TRIGGER update_cart_items_updatedAt BEFORE UPDATE ON cart_items
 
 DROP TRIGGER IF EXISTS update_orders_updatedAt ON orders;
 CREATE TRIGGER update_orders_updatedAt BEFORE UPDATE ON orders
+    FOR EACH ROW EXECUTE FUNCTION update_updatedat_column();
+
+DROP TRIGGER IF EXISTS update_users_updatedAt ON users;
+CREATE TRIGGER update_users_updatedAt BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updatedat_column();
 
 -- Verify the setup

@@ -13,13 +13,50 @@ export const contactSubmissions = pgTable("contact_submissions", {
   createdAt: timestamp("createdat").defaultNow().notNull(),
 });
 
+// Users table for authentication
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  name: text("name").notNull(),
+  role: text("role").notNull().default("customer"), // customer, admin
+  phone: text("phone"),
+  address: text("address"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("createdat").defaultNow().notNull(),
+  updatedAt: timestamp("updatedat").defaultNow().notNull(),
+});
+
 export const insertContactSubmissionSchema = createInsertSchema(contactSubmissions).omit({
   id: true,
   createdAt: true,
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
+export const registerSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  name: z.string().min(2),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+});
+
 export type InsertContactSubmission = z.infer<typeof insertContactSubmissionSchema>;
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type LoginRequest = z.infer<typeof loginSchema>;
+export type RegisterRequest = z.infer<typeof registerSchema>;
 
 // Products table
 export const products = pgTable("products", {
@@ -38,7 +75,8 @@ export const products = pgTable("products", {
 // Shopping cart table
 export const cartItems = pgTable("cart_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  sessionId: text("sessionid").notNull(),
+  sessionId: text("sessionid"), // for guest users
+  userId: varchar("userid").references(() => users.id, { onDelete: "cascade" }), // for logged-in users
   productId: varchar("productid").notNull().references(() => products.id, { onDelete: "cascade" }),
   quantity: integer("quantity").notNull().default(1),
   createdAt: timestamp("createdat").defaultNow().notNull(),
@@ -48,6 +86,7 @@ export const cartItems = pgTable("cart_items", {
 // Orders table
 export const orders = pgTable("orders", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("userid").references(() => users.id), // for logged-in users
   customerName: text("customername").notNull(),
   customerEmail: text("customeremail").notNull(),
   customerPhone: text("customerphone"),
@@ -69,15 +108,28 @@ export const orderItems = pgTable("order_items", {
 });
 
 // Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  cartItems: many(cartItems),
+  orders: many(orders),
+}));
+
 export const cartItemsRelations = relations(cartItems, ({ one }) => ({
   product: one(products, {
     fields: [cartItems.productId],
     references: [products.id],
   }),
+  user: one(users, {
+    fields: [cartItems.userId],
+    references: [users.id],
+  }),
 }));
 
-export const orderRelations = relations(orders, ({ many }) => ({
+export const orderRelations = relations(orders, ({ many, one }) => ({
   items: many(orderItems),
+  user: one(users, {
+    fields: [orders.userId],
+    references: [users.id],
+  }),
 }));
 
 export const orderItemsRelations = relations(orderItems, ({ one }) => ({

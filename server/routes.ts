@@ -2,11 +2,15 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
 import { storage } from "./storage";
+import { authService } from "./auth-service";
+import { authenticateToken, optionalAuth, requireAdmin, requireCustomer } from "./auth-middleware";
 import { 
   insertContactSubmissionSchema, 
   insertProductSchema,
   insertOrderSchema,
   insertOrderItemSchema,
+  loginSchema,
+  registerSchema,
   type InsertOrderItem 
 } from "@shared/schema";
 import { sendOrderConfirmationEmail } from './email-service';
@@ -27,6 +31,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     saveUninitialized: true,
     cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
   }));
+
+  // Authentication routes
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const validatedData = registerSchema.parse(req.body);
+      const { user, token } = await authService.register(validatedData);
+      res.json({ success: true, user, token });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          success: false, 
+          error: "Invalid registration data", 
+          details: error.errors 
+        });
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          error: error.message || "Registration failed" 
+        });
+      }
+    }
+  });
+
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const validatedData = loginSchema.parse(req.body);
+      const { user, token } = await authService.login(validatedData);
+      res.json({ success: true, user, token });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          success: false, 
+          error: "Invalid login data", 
+          details: error.errors 
+        });
+      } else {
+        res.status(401).json({ 
+          success: false, 
+          error: error.message || "Login failed" 
+        });
+      }
+    }
+  });
+
+  app.get("/api/auth/me", authenticateToken, async (req, res) => {
+    try {
+      const user = await authService.getUserById(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json({ 
+        id: user.id, 
+        email: user.email, 
+        name: user.name, 
+        role: user.role,
+        phone: user.phone,
+        address: user.address 
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get user profile" });
+    }
+  });
+
+  app.put("/api/auth/profile", authenticateToken, async (req, res) => {
+    try {
+      const { name, phone, address } = req.body;
+      const updatedUser = await authService.updateUser(req.user!.id, {
+        name,
+        phone,
+        address
+      });
+      res.json({ 
+        success: true, 
+        user: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          name: updatedUser.name,
+          role: updatedUser.role,
+          phone: updatedUser.phone,
+          address: updatedUser.address
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update profile" });
+    }
+  });
 
   // Contact form submission endpoint
   app.post("/api/contact", async (req, res) => {
@@ -107,10 +197,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cart routes
-  app.get("/api/cart", async (req, res) => {
+  app.get("/api/cart", optionalAuth, async (req, res) => {
     try {
-      const sessionId = getSessionId(req);
-      const cartItems = await storage.getCartItems(sessionId);
+      const userId = req.user?.id;
+      const sessionId = userId ? undefined : getSessionId(req);
+      const cartItems = await storage.getCartItems(sessionId, userId);
       res.json(cartItems);
     } catch (error: any) {
       console.error("Error fetching cart items:", error);
@@ -118,23 +209,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/cart", async (req, res) => {
+  app.post("/api/cart", optionalAuth, async (req, res) => {
     try {
-      const sessionId = getSessionId(req);
+      const userId = req.user?.id;
+      const sessionId = userId ? undefined : getSessionId(req);
       const { productId, quantity = 1 } = req.body;
       
       if (!productId) {
         return res.status(400).json({ error: "Product ID is required" });
       }
 
-      const cartItem = await storage.addToCart(sessionId, productId, quantity);
+      const cartItem = await storage.addToCart(sessionId, productId, quantity, userId);
       res.json(cartItem);
     } catch (error: any) {
       res.status(400).json({ error: error.message || "Failed to add to cart" });
     }
   });
 
-  app.put("/api/cart/:id", async (req, res) => {
+  app.put("/api/cart/:id", optionalAuth, async (req, res) => {
     try {
       const { quantity } = req.body;
       
@@ -149,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/cart/:id", async (req, res) => {
+  app.delete("/api/cart/:id", optionalAuth, async (req, res) => {
     try {
       await storage.removeFromCart(req.params.id);
       res.json({ success: true });
@@ -158,10 +250,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/cart", async (req, res) => {
+  app.delete("/api/cart", optionalAuth, async (req, res) => {
     try {
-      const sessionId = getSessionId(req);
-      await storage.clearCart(sessionId);
+      const userId = req.user?.id;
+      const sessionId = userId ? undefined : getSessionId(req);
+      await storage.clearCart(sessionId, userId);
       res.json({ success: true });
     } catch (error: any) {
       res.status(400).json({ error: error.message || "Failed to clear cart" });
@@ -169,15 +262,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Order routes
-  app.post("/api/orders", async (req, res) => {
+  app.post("/api/orders", optionalAuth, async (req, res) => {
     try {
-      const sessionId = getSessionId(req);
+      const userId = req.user?.id;
+      const sessionId = userId ? undefined : getSessionId(req);
       const { customerName, customerEmail, customerPhone, shippingAddress } = req.body;
       
       // Get cart items
-      const cartItems = await storage.getCartItems(sessionId);
+      const cartItems = await storage.getCartItems(sessionId, userId);
       if (cartItems.length === 0) {
         return res.status(400).json({ error: "Cart is empty" });
+      }
+
+      // Validate stock availability for all items
+      for (const item of cartItems) {
+        if (item.quantity > item.product.stock) {
+          return res.status(400).json({ 
+            error: `Insufficient stock for ${item.product.name}. Only ${item.product.stock} items available.` 
+          });
+        }
       }
 
       // Calculate total
@@ -192,6 +295,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerPhone,
         shippingAddress,
         totalAmount: totalAmount.toString(),
+        userId,
       };
 
       const orderItems = cartItems.map(item => ({
@@ -215,7 +319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Clear cart after successful order
-      await storage.clearCart(sessionId);
+      await storage.clearCart(sessionId, userId);
       
       res.json(order);
     } catch (error: any) {
@@ -223,12 +327,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/orders", async (req, res) => {
+  app.get("/api/orders", requireAdmin, async (req, res) => {
     try {
       const orders = await storage.getOrders();
       res.json(orders);
     } catch (error: any) {
       res.status(500).json({ error: "Failed to fetch orders" });
+    }
+  });
+
+  app.get("/api/orders/my", authenticateToken, async (req, res) => {
+    try {
+      const orders = await storage.getUserOrders(req.user!.id);
+      res.json(orders);
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to fetch user orders" });
     }
   });
 

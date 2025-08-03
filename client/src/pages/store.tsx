@@ -72,6 +72,12 @@ export default function Store() {
     return cartItems.reduce((total, item) => total + (item.quantity * parseFloat(item.product.price)), 0);
   };
 
+  const getRemainingStock = (productId: string, totalStock: number) => {
+    const cartItem = cartItems.find(item => item.productId === productId);
+    const cartQuantity = cartItem ? cartItem.quantity : 0;
+    return Math.max(0, totalStock - cartQuantity);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -158,17 +164,20 @@ export default function Store() {
                       ₹{parseFloat(product.price).toFixed(0)}
                     </span>
                     <span className="text-sm text-gray-500">
-                      {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+                      {(() => {
+                        const remainingStock = getRemainingStock(product.id, product.stock);
+                        return remainingStock > 0 ? `${remainingStock} in stock` : "Out of stock";
+                      })()}
                     </span>
                   </div>
                   
                   <Button 
                     onClick={() => addToCart(product.id)}
-                    disabled={product.stock === 0}
+                    disabled={getRemainingStock(product.id, product.stock) === 0}
                     className="w-full bg-primary hover:bg-primary/80 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 group-hover:shadow-lg"
                   >
                     <ShoppingCart className="w-4 h-4 mr-2" />
-                    {product.stock > 0 ? "Add to Cart" : "Out of Stock"}
+                    {getRemainingStock(product.id, product.stock) > 0 ? "Add to Cart" : "Out of Stock"}
                   </Button>
                 </div>
               </CardContent>

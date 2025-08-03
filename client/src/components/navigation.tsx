@@ -1,10 +1,20 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Menu, X, ShoppingCart } from "lucide-react";
+import { Menu, X, ShoppingCart, User, LogOut, Settings, History } from "lucide-react";
 import { Link } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   interface CartItemWithProduct {
     id: string;
@@ -60,6 +70,61 @@ export default function Navigation() {
                   </span>
                 )}
               </Link>
+              
+              {/* Authentication Section */}
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <User className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <div className="flex items-center justify-start gap-2 p-2">
+                      <div className="flex flex-col space-y-1 leading-none">
+                        <p className="font-medium">{user.name}</p>
+                        <p className="w-[200px] truncate text-sm text-muted-foreground">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="cursor-pointer">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Profile Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/orders" className="cursor-pointer">
+                        <History className="mr-2 h-4 w-4" />
+                        Order History
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onSelect={() => logout()}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Link to="/login">
+                    <Button variant="ghost" size="sm">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button size="sm">
+                      Sign Up
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
           
@@ -95,6 +160,40 @@ export default function Navigation() {
                   </span>
                 )}
               </Link>
+              
+              {/* Mobile Authentication Section */}
+              {user ? (
+                <>
+                  <div className="px-3 py-2 text-white border-t border-gray-600 mt-2">
+                    <p className="font-medium">{user.name}</p>
+                    <p className="text-sm text-gray-300">{user.email}</p>
+                  </div>
+                  <Link to="/profile" className="block px-3 py-2 text-white hover:text-primary transition-colors font-medium">
+                    <User className="w-4 h-4 mr-2 inline" />
+                    Profile
+                  </Link>
+                  <Link to="/orders" className="block px-3 py-2 text-white hover:text-primary transition-colors font-medium">
+                    <History className="w-4 h-4 mr-2 inline" />
+                    Order History
+                  </Link>
+                  <button
+                    onClick={() => logout()}
+                    className="block w-full text-left px-3 py-2 text-white hover:text-primary transition-colors font-medium"
+                  >
+                    <LogOut className="w-4 h-4 mr-2 inline" />
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="block px-3 py-2 text-white hover:text-primary transition-colors font-medium">
+                    Login
+                  </Link>
+                  <Link to="/register" className="block px-3 py-2 text-white hover:text-primary transition-colors font-medium">
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
