@@ -94,24 +94,24 @@ export default function Checkout() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="animate-spin w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-white text-gray-900 flex items-center justify-center">
+        <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-white text-gray-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-4">Your Cart is Empty</h1>
-            <p className="text-gray-400 text-lg mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Your Cart is Empty</h1>
+            <p className="text-gray-600 text-lg mb-8">
               You need items in your cart to proceed with checkout.
             </p>
             <Button 
               onClick={() => setLocation("/store")}
-              className="bg-amber-500 hover:bg-amber-600 text-black font-semibold px-8 py-3"
+              className="bg-primary hover:bg-primary/80 text-white font-semibold px-8 py-3"
             >
               Continue Shopping
             </Button>
@@ -122,19 +122,19 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-white text-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Checkout</h1>
-          <p className="text-gray-400">Complete your order information</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Checkout</h1>
+          <p className="text-gray-600">Complete your order information</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Checkout Form */}
           <div>
-            <Card className="bg-gray-900/50 border-gray-800 backdrop-blur-sm">
+            <Card className="bg-white border-gray-200 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-white flex items-center">
+                <CardTitle className="text-gray-900 flex items-center">
                   <User className="w-5 h-5 mr-2" />
                   Shipping Information
                 </CardTitle>
@@ -147,7 +147,7 @@ export default function Checkout() {
                       name="customerName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-300 flex items-center">
+                          <FormLabel className="text-gray-700 flex items-center">
                             <User className="w-4 h-4 mr-2" />
                             Full Name
                           </FormLabel>
@@ -155,7 +155,7 @@ export default function Checkout() {
                             <Input 
                               {...field} 
                               placeholder="Enter your full name"
-                              className="bg-gray-800 border-gray-700 text-white focus:border-amber-500"
+                              className="bg-white border-gray-300 text-gray-900 focus:border-primary"
                             />
                           </FormControl>
                           <FormMessage />
@@ -168,7 +168,7 @@ export default function Checkout() {
                       name="customerEmail"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-300 flex items-center">
+                          <FormLabel className="text-gray-700 flex items-center">
                             <Mail className="w-4 h-4 mr-2" />
                             Email Address
                           </FormLabel>
@@ -177,7 +177,7 @@ export default function Checkout() {
                               {...field} 
                               type="email"
                               placeholder="Enter your email address"
-                              className="bg-gray-800 border-gray-700 text-white focus:border-amber-500"
+                              className="bg-white border-gray-300 text-gray-900 focus:border-primary"
                             />
                           </FormControl>
                           <FormMessage />
@@ -190,7 +190,7 @@ export default function Checkout() {
                       name="customerPhone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-300 flex items-center">
+                          <FormLabel className="text-gray-700 flex items-center">
                             <Phone className="w-4 h-4 mr-2" />
                             Phone Number (Optional)
                           </FormLabel>
@@ -199,7 +199,7 @@ export default function Checkout() {
                               {...field} 
                               type="tel"
                               placeholder="Enter your phone number"
-                              className="bg-gray-800 border-gray-700 text-white focus:border-amber-500"
+                              className="bg-white border-gray-300 text-gray-900 focus:border-primary"
                             />
                           </FormControl>
                           <FormMessage />
@@ -212,7 +212,7 @@ export default function Checkout() {
                       name="shippingAddress"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-300 flex items-center">
+                          <FormLabel className="text-gray-700 flex items-center">
                             <MapPin className="w-4 h-4 mr-2" />
                             Shipping Address
                           </FormLabel>
@@ -220,7 +220,7 @@ export default function Checkout() {
                             <Textarea 
                               {...field} 
                               placeholder="Enter your complete shipping address including street, city, state, and zip code"
-                              className="bg-gray-800 border-gray-700 text-white focus:border-amber-500 min-h-[100px]"
+                              className="bg-white border-gray-300 text-gray-900 focus:border-primary min-h-[100px]"
                             />
                           </FormControl>
                           <FormMessage />
@@ -231,7 +231,7 @@ export default function Checkout() {
                     <Button 
                       type="submit" 
                       disabled={createOrderMutation.isPending}
-                      className="w-full bg-amber-500 hover:bg-amber-600 text-black font-semibold py-3 mt-8"
+                      className="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-3 mt-8"
                     >
                       <CreditCard className="w-4 h-4 mr-2" />
                       {createOrderMutation.isPending ? "Processing..." : "Place Order"}
@@ -244,15 +244,15 @@ export default function Checkout() {
 
           {/* Order Summary */}
           <div>
-            <Card className="bg-gray-900/50 border-gray-800 backdrop-blur-sm sticky top-4">
+            <Card className="bg-white border-gray-200 shadow-sm sticky top-4">
               <CardHeader>
-                <CardTitle className="text-white">Order Summary</CardTitle>
+                <CardTitle className="text-gray-900">Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Cart Items */}
                 <div className="space-y-3 max-h-64 overflow-y-auto">
                   {cartItems.map((item) => (
-                    <div key={item.id} className="flex items-center space-x-3 pb-3 border-b border-gray-700">
+                    <div key={item.id} className="flex items-center space-x-3 pb-3 border-b border-gray-200">
                       <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
                         <img 
                           src={item.product.imageUrl} 
@@ -261,22 +261,22 @@ export default function Checkout() {
                         />
                       </div>
                       <div className="flex-grow">
-                        <h4 className="text-sm font-medium text-white">{item.product.name}</h4>
-                        <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
+                        <h4 className="text-sm font-medium text-gray-900">{item.product.name}</h4>
+                        <p className="text-xs text-gray-600">Qty: {item.quantity}</p>
                       </div>
-                      <div className="text-sm font-medium text-amber-400">
+                      <div className="text-sm font-medium text-primary">
                         ₹{(parseFloat(item.product.price) * item.quantity).toFixed(0)}
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="space-y-2 pt-4 border-t border-gray-700">
-                  <div className="flex justify-between text-gray-300">
+                <div className="space-y-2 pt-4 border-t border-gray-200">
+                  <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
                     <span>₹{subtotal.toFixed(0)}</span>
                   </div>
-                  <div className="flex justify-between text-gray-300">
+                  <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
                     <span className={shipping === 0 ? "text-green-500" : ""}>
                       {shipping === 0 ? "FREE" : `₹${shipping.toFixed(0)}`}
@@ -287,10 +287,10 @@ export default function Checkout() {
                       Free shipping on orders over ₹500
                     </p>
                   )}
-                  <div className="border-t border-gray-700 pt-2">
-                    <div className="flex justify-between text-lg font-semibold text-white">
+                  <div className="border-t border-gray-200 pt-2">
+                    <div className="flex justify-between text-lg font-semibold text-gray-900">
                       <span>Total</span>
-                      <span className="text-amber-400">₹{total.toFixed(0)}</span>
+                      <span className="text-primary">₹{total.toFixed(0)}</span>
                     </div>
                   </div>
                 </div>

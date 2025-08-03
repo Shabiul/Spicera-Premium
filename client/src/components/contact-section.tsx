@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { Phone, Mail, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +22,6 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { insertContactSubmissionSchema } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
 
 export default function ContactSection() {
   const { toast } = useToast();
@@ -39,72 +37,86 @@ export default function ContactSection() {
     },
   });
 
-  const contactMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await apiRequest("POST", "/api/contact", data);
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Message sent successfully!",
-        description: "We'll get back to you soon.",
+  const onSubmit = async (data: any) => {
+    setIsSubmitting(true);
+    
+    try {
+      const formData = new FormData();
+      // Your access key is now included here
+      formData.append('access_key', '8e403798-0852-424d-ba5b-e3a3061caa0f'); 
+      formData.append('name', data.name);
+      formData.append('email', data.email);
+      formData.append('subject', data.subject);
+      formData.append('message', data.message);
+      
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData
       });
-      form.reset();
-      setIsSubmitting(false);
-    },
-    onError: (error: any) => {
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          title: "Message sent successfully!",
+          description: "We'll get back to you soon. ✨",
+        });
+        form.reset();
+      } else {
+        throw new Error(result.message || 'Failed to send message');
+      }
+    } catch (error: any) {
       toast({
         title: "Failed to send message",
         description: error.message || "Please try again later.",
         variant: "destructive",
       });
+    } finally {
       setIsSubmitting(false);
-    },
-  });
-
-  const onSubmit = (data: any) => {
-    setIsSubmitting(true);
-    contactMutation.mutate(data);
+    }
   };
 
   return (
-    <section id="contact" className="py-20 bg-gray-900">
+    <section id="contact" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           <div className="fade-in">
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-6">Get In Touch</h2>
-            <p className="text-lg text-gray-300 mb-8">
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-gray-900 mb-6">Get In Touch</h2>
+            <p className="text-lg text-gray-600 mb-8">
               Ready to elevate your culinary experience? Contact us for custom blends, bulk orders, or any questions about our premium spices.
             </p>
             
             <div className="space-y-6">
               <div className="flex items-center hover-lift">
-                <div className="bg-spice-gold p-4 rounded-full mr-6 hover:scale-110 transition-all duration-300 hover-glow">
-                  <Phone className="text-black h-6 w-6" />
+                <div className="bg-primary p-4 rounded-full mr-6 hover:scale-110 transition-all duration-300 hover-glow">
+                  <Phone className="text-white h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-white text-lg">Phone</h4>
-                  <p className="text-gray-300">+1 (555) 123-SPICE</p>
+                  {/* Corrected text color to be visible on white background */}
+                  <h4 className="font-semibold text-gray-800 text-lg">Phone</h4>
+                  <p className="text-gray-600">+1 (555) 123-SPICE</p>
                 </div>
               </div>
               
               <div className="flex items-center hover-lift">
-                <div className="bg-spice-gold p-4 rounded-full mr-6 hover:scale-110 transition-all duration-300 hover-glow">
-                  <Mail className="text-black h-6 w-6" />
+                <div className="bg-primary p-4 rounded-full mr-6 hover:scale-110 transition-all duration-300 hover-glow">
+                  {/* Corrected icon color for consistency */}
+                  <Mail className="text-white h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-white text-lg">Email</h4>
-                  <p className="text-gray-300">hello@spicerapremium.com</p>
+                  <h4 className="font-semibold text-gray-800 text-lg">Email</h4>
+                  <p className="text-gray-600">hello@spicerapremium.com</p>
                 </div>
               </div>
               
               <div className="flex items-center hover-lift">
-                <div className="bg-spice-gold p-4 rounded-full mr-6 hover:scale-110 transition-all duration-300 hover-glow">
-                  <MapPin className="text-black h-6 w-6" />
+                <div className="bg-primary p-4 rounded-full mr-6 hover:scale-110 transition-all duration-300 hover-glow">
+                  {/* Corrected icon color for consistency */}
+                  <MapPin className="text-white h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-white text-lg">Location</h4>
-                  <p className="text-gray-300">Artisan District, Portland, OR</p>
+                  <h4 className="font-semibold text-gray-800 text-lg">Location</h4>
+                  <p className="text-gray-600">Artisan District, Portland, OR</p>
                 </div>
               </div>
             </div>
@@ -112,8 +124,9 @@ export default function ContactSection() {
           
           <div className="fade-in">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="glass-card bg-gray-800/50 p-6 lg:p-8 rounded-2xl shadow-lg space-y-6 border border-gray-600/30 backdrop-blur-lg hover:shadow-2xl transition-all duration-300">
-                <h3 className="font-display text-2xl font-semibold text-white mb-6">Send us a message</h3>
+              {/* Corrected form styling for light theme */}
+              <form onSubmit={form.handleSubmit(onSubmit)} className="bg-gray-50/70 p-6 lg:p-8 rounded-2xl shadow-lg space-y-6 border border-gray-200 backdrop-blur-lg hover:shadow-2xl transition-all duration-300">
+                <h3 className="font-display text-2xl font-semibold text-gray-900 mb-6">Send us a message</h3>
                 
                 <FormField
                   control={form.control}
@@ -122,9 +135,10 @@ export default function ContactSection() {
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">Name</FormLabel>
                       <FormControl>
+                        {/* Corrected focus ring color for consistency */}
                         <Input 
                           placeholder="Your full name" 
-                          className="focus:ring-spice-gold focus:border-transparent" 
+                          className="focus:ring-primary focus:border-primary" 
                           {...field} 
                         />
                       </FormControl>
@@ -143,7 +157,7 @@ export default function ContactSection() {
                         <Input 
                           type="email" 
                           placeholder="your@email.com" 
-                          className="focus:ring-spice-gold focus:border-transparent" 
+                          className="focus:ring-primary focus:border-primary" 
                           {...field} 
                         />
                       </FormControl>
@@ -160,7 +174,7 @@ export default function ContactSection() {
                       <FormLabel className="text-sm font-medium text-gray-700">Subject</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="focus:ring-spice-gold focus:border-transparent">
+                          <SelectTrigger className="focus:ring-primary focus:border-primary">
                             <SelectValue placeholder="Select a subject" />
                           </SelectTrigger>
                         </FormControl>
@@ -186,7 +200,7 @@ export default function ContactSection() {
                         <Textarea 
                           rows={4} 
                           placeholder="Tell us how we can help you..." 
-                          className="focus:ring-spice-gold focus:border-transparent" 
+                          className="focus:ring-primary focus:border-primary" 
                           {...field} 
                         />
                       </FormControl>
@@ -198,7 +212,7 @@ export default function ContactSection() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full bg-spice-gold hover:bg-spice-amber text-black px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-500 hover:transform hover:scale-105 hover:shadow-2xl hover-glow disabled:opacity-50 disabled:hover:scale-100"
+                  className="w-full bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:hover:scale-100"
                 >
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>

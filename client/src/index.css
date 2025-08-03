@@ -4,20 +4,20 @@
 
 :root {
   /* Dark theme base colors */
-  --background: hsl(0, 0%, 5%);
-  --foreground: hsl(0, 0%, 95%);
-  --muted: hsl(0, 0%, 10%);
-  --muted-foreground: hsl(0, 0%, 60%);
-  --popover: hsl(0, 0%, 8%);
-  --popover-foreground: hsl(0, 0%, 95%);
-  --card: hsl(0, 0%, 8%);
-  --card-foreground: hsl(0, 0%, 95%);
-  --border: hsl(0, 0%, 15%);
-  --input: hsl(0, 0%, 15%);
-  --primary: hsl(45, 100%, 50%);
-  --primary-foreground: hsl(0, 0%, 0%);
-  --secondary: hsl(0, 0%, 10%);
-  --secondary-foreground: hsl(0, 0%, 95%);
+  --background: #ffffff;
+  --foreground: hsl(0, 0%, 20%);
+  --muted: hsl(0, 0%, 96%);
+  --muted-foreground: hsl(0, 0%, 40%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(0, 0%, 20%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(0, 0%, 20%);
+  --border: hsl(0, 0%, 90%);
+  --input: hsl(0, 0%, 90%);
+  --primary: #9ec7b0;
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(0, 0%, 96%);
+  --secondary-foreground: hsl(0, 0%, 20%);
   --accent: hsl(0, 0%, 12%);
   --accent-foreground: hsl(0, 0%, 95%);
   --destructive: hsl(0, 62.8%, 30.6%);
@@ -25,14 +25,11 @@
   --ring: hsl(45, 100%, 50%);
   --radius: 0.5rem;
   
-  /* Black and Gold dark theme colors with Glass effect */
+  /* Dark theme colors */
   --spice-brown: hsl(0, 0%, 0%);
   --spice-chocolate: hsl(0, 0%, 15%);
-  --spice-gold: hsl(45, 100%, 50%);
   --spice-cream: hsl(0, 0%, 8%);
   --spice-dark: hsl(0, 0%, 0%);
-  --spice-orange: hsl(45, 100%, 50%);
-  --spice-amber: hsl(45, 100%, 60%);
   
   /* Glass effect variables for dark theme */
   --glass-bg: rgba(255, 255, 255, 0.05);
@@ -176,10 +173,10 @@
   }
 
   .glass-card:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 215, 0, 0.4);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(158, 199, 176, 0.4);
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 40px rgba(158, 199, 176, 0.2);
   }
 
   /* Improved fade-in animations */
@@ -235,16 +232,8 @@
     color: var(--spice-chocolate);
   }
 
-  .text-spice-gold {
-    color: var(--spice-gold);
-  }
-
   .text-spice-dark {
     color: var(--spice-dark);
-  }
-
-  .text-spice-orange {
-    color: var(--spice-orange);
   }
 
   .bg-spice-brown {
@@ -255,10 +244,6 @@
     background-color: var(--spice-chocolate);
   }
 
-  .bg-spice-gold {
-    background-color: var(--spice-gold);
-  }
-
   .bg-spice-cream {
     background-color: var(--spice-cream);
   }
@@ -267,36 +252,12 @@
     background-color: var(--spice-dark);
   }
 
-  .bg-spice-orange {
-    background-color: var(--spice-orange);
-  }
-
-  .bg-spice-amber {
-    background-color: var(--spice-amber);
-  }
-
-  .border-spice-gold {
-    border-color: var(--spice-gold);
-  }
-
   .hover\:bg-spice-dark:hover {
     background-color: var(--spice-dark);
   }
 
-  .hover\:bg-spice-amber:hover {
-    background-color: var(--spice-amber);
-  }
-
   .hover\:text-spice-brown:hover {
     color: var(--spice-brown);
-  }
-
-  .hover\:text-spice-gold:hover {
-    color: var(--spice-gold);
-  }
-
-  .focus\:ring-spice-gold:focus {
-    --tw-ring-color: var(--spice-gold);
   }
 
   .font-display {

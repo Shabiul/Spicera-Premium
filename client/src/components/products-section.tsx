@@ -51,7 +51,7 @@ export default function ProductsSection() {
   if (featuredLoading || allLoading) {
     return (
       <div className="py-20 bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full" />
+        <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -74,7 +74,7 @@ export default function ProductsSection() {
             ];
             
             return (
-              <div key={product.id} className="group hover-lift glass-card bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50 hover:border-amber-500/50 transition-all duration-300">
+              <div key={product.id} className="group hover-lift glass-card bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 hover:border-primary/50 transition-all duration-300">
                 <div className="relative mb-4 overflow-hidden rounded-lg">
                   <img 
                     src={spiceImages[index] || spiceImages[0]} 
@@ -90,7 +90,7 @@ export default function ProductsSection() {
                 </div>
                 
                 <div className="text-center">
-                  <h3 className="text-xl font-bold text-white mb-3 group-hover:text-amber-400 transition-colors duration-300">
+                  <h3 className="text-xl font-bold text-white mb-3 group-hover:text-primary transition-colors duration-300">
                     {product.name}
                   </h3>
                   <p className="text-gray-400 text-sm mb-4 leading-relaxed">
@@ -98,10 +98,10 @@ export default function ProductsSection() {
                   </p>
                   
                   <div className="flex flex-col gap-3">
-                    <span className="text-2xl font-bold text-amber-400">₹{product.price}</span>
+                    <span className="text-2xl font-bold text-primary">₹{product.price}</span>
                     <Button 
                       onClick={() => addToCart(product.id, product.name)}
-                      className="w-full bg-amber-500 hover:bg-amber-600 text-black font-semibold py-2 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
+                      className="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-2 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
                     >
                       <ShoppingCart size={16} />
                       Add to Cart
@@ -115,7 +115,7 @@ export default function ProductsSection() {
         
         <div className="text-center mt-16 fade-in">
           <Link to="/store">
-            <Button className="bg-amber-500 hover:bg-amber-600 text-black px-8 py-4 rounded-full font-semibold text-lg transition-all duration-500 hover:transform hover:scale-110 hover:shadow-2xl">
+            <Button className="bg-primary hover:bg-primary/80 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-500 hover:transform hover:scale-110 hover:shadow-2xl">
               Explore Our Store
             </Button>
           </Link>
