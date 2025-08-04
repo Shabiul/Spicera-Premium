@@ -64,6 +64,7 @@ export class AuthService {
       phone: userData.phone,
       address: userData.address,
       role: 'customer',
+      isActive: true,
     }).returning();
 
     const authUser: AuthUser = {

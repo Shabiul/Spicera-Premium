@@ -1,9 +1,12 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ShoppingCart, Plus, Minus, Trash2, CreditCard } from "lucide-react";
-import { Link } from "wouter";
+import { ShoppingCart, Plus, Minus, Trash2, CreditCard, LogIn } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface CartItemWithProduct {
@@ -29,6 +32,9 @@ interface CartItemWithProduct {
 
 export default function Cart() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [, setLocation] = useLocation();
 
   const { data: cartItems = [], isLoading, refetch } = useQuery<CartItemWithProduct[]>({
     queryKey: ["/api/cart"],
@@ -97,6 +103,16 @@ export default function Cart() {
 
   const removeItem = (id: string) => {
     removeItemMutation.mutate(id);
+  };
+
+  const handleCheckoutClick = () => {
+    if (user) {
+      // User is logged in, proceed to checkout
+      setLocation('/checkout');
+    } else {
+      // User is not logged in, show login dialog
+      setShowLoginDialog(true);
+    }
   };
 
   const clearCart = () => {
@@ -259,17 +275,46 @@ export default function Cart() {
                     <span className="text-primary">₹{total.toFixed(0)}</span>
                   </div>
                 </div>
-                <Link to="/checkout">
-                  <Button className="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-3 mt-6">
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    Proceed to Checkout
-                  </Button>
-                </Link>
+                <Button 
+                  onClick={handleCheckoutClick}
+                  className="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-3 mt-6"
+                >
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Proceed to Checkout
+                </Button>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
+
+      {/* Login Required Dialog */}
+      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LogIn className="w-5 h-5 text-primary" />
+              Login Required
+            </DialogTitle>
+            <DialogDescription>
+              You must be logged in to checkout the items from your cart.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 mt-4">
+            <Link to="/login">
+              <Button className="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-3" onClick={() => setShowLoginDialog(false)}>
+                <LogIn className="w-4 h-4 mr-2" />
+                Login
+              </Button>
+            </Link>
+            <Link to="/register">
+              <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 py-3" onClick={() => setShowLoginDialog(false)}>
+                Create Account
+              </Button>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

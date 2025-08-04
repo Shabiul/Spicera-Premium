@@ -36,7 +36,9 @@ export default function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-display font-bold text-gray-900 hover:text-primary hover:scale-105 transition-all duration-300">Spicera Premium</h1>
+            <Link to="/">
+              <h1 className="text-2xl font-display font-bold text-gray-900 hover:text-primary hover:scale-105 transition-all duration-300 cursor-pointer">Spicera Premium</h1>
+            </Link>
           </div>
           
           {/* Desktop Navigation */}
@@ -46,7 +48,7 @@ export default function Navigation() {
                 Home
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="#products" className="text-white hover:text-primary transition-all duration-300 font-medium relative group">
+              <a href="#products" className="text-black hover:text-primary transition-all duration-300 font-medium relative group">
                 Products
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </a>
@@ -54,11 +56,11 @@ export default function Navigation() {
                 Store
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <a href="#story" className="text-white hover:text-primary transition-all duration-300 font-medium relative group">
+              <a href="#story" className="text-black hover:text-primary transition-all duration-300 font-medium relative group">
                 Our Story
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="#contact" className="text-white hover:text-primary transition-all duration-300 font-medium relative group">
+              <a href="#contact" className="text-black hover:text-primary transition-all duration-300 font-medium relative group">
                 Contact
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </a>
@@ -101,10 +103,18 @@ export default function Navigation() {
                         Order History
                       </Link>
                     </DropdownMenuItem>
+                    {user.role === 'admin' && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="cursor-pointer">
+                          <Settings className="mr-2 h-4 w-4" />
+                          Admin Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       className="cursor-pointer"
-                      onSelect={() => logout()}
+                      onSelect={async () => await logout()}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Log out
@@ -132,7 +142,7 @@ export default function Navigation() {
           <div className="md:hidden">
             <button
               type="button"
-              className="text-white hover:text-primary"
+              className="text-black hover:text-primary"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -144,12 +154,12 @@ export default function Navigation() {
         {isMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 glass-dark rounded-b-lg mx-4">
-              <a href="#home" className="block px-3 py-2 text-white hover:text-primary transition-colors font-medium">Home</a>
-            <a href="#products" className="block px-3 py-2 text-white hover:text-primary transition-colors font-medium">Products</a>
-            <Link to="/store" className="block px-3 py-2 text-white hover:text-primary transition-colors font-medium">Store</Link>
-            <a href="#story" className="block px-3 py-2 text-white hover:text-primary transition-colors font-medium">Our Story</a>
-            <a href="#contact" className="block px-3 py-2 text-white hover:text-primary transition-colors font-medium">Contact</a>
-            <Link to="/cart" className="flex items-center justify-between px-3 py-2 text-white hover:text-primary transition-colors font-medium">
+              <a href="#home" className="block px-3 py-2 text-black hover:text-primary transition-colors font-medium">Home</a>
+            <a href="#products" className="block px-3 py-2 text-black hover:text-primary transition-colors font-medium">Products</a>
+            <Link to="/store" className="block px-3 py-2 text-black hover:text-primary transition-colors font-medium">Store</Link>
+            <a href="#story" className="block px-3 py-2 text-black hover:text-primary transition-colors font-medium">Our Story</a>
+            <a href="#contact" className="block px-3 py-2 text-black hover:text-primary transition-colors font-medium">Contact</a>
+            <Link to="/cart" className="flex items-center justify-between px-3 py-2 text-black hover:text-primary transition-colors font-medium">
                 <span className="flex items-center">
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Cart
@@ -164,21 +174,21 @@ export default function Navigation() {
               {/* Mobile Authentication Section */}
               {user ? (
                 <>
-                  <div className="px-3 py-2 text-white border-t border-gray-600 mt-2">
+                  <div className="px-3 py-2 text-black border-t border-gray-600 mt-2">
                     <p className="font-medium">{user.name}</p>
-                    <p className="text-sm text-gray-300">{user.email}</p>
+                    <p className="text-sm text-gray-600">{user.email}</p>
                   </div>
-                  <Link to="/profile" className="block px-3 py-2 text-white hover:text-primary transition-colors font-medium">
+                  <Link to="/profile" className="block px-3 py-2 text-black hover:text-primary transition-colors font-medium">
                     <User className="w-4 h-4 mr-2 inline" />
                     Profile
                   </Link>
-                  <Link to="/orders" className="block px-3 py-2 text-white hover:text-primary transition-colors font-medium">
+                  <Link to="/orders" className="block px-3 py-2 text-black hover:text-primary transition-colors font-medium">
                     <History className="w-4 h-4 mr-2 inline" />
                     Order History
                   </Link>
                   <button
-                    onClick={() => logout()}
-                    className="block w-full text-left px-3 py-2 text-white hover:text-primary transition-colors font-medium"
+                    onClick={async () => await logout()}
+                    className="block w-full text-left px-3 py-2 text-black hover:text-primary transition-colors font-medium"
                   >
                     <LogOut className="w-4 h-4 mr-2 inline" />
                     Logout
@@ -186,10 +196,10 @@ export default function Navigation() {
                 </>
               ) : (
                 <>
-                  <Link to="/login" className="block px-3 py-2 text-white hover:text-primary transition-colors font-medium">
+                  <Link to="/login" className="block px-3 py-2 text-black hover:text-primary transition-colors font-medium">
                     Login
                   </Link>
-                  <Link to="/register" className="block px-3 py-2 text-white hover:text-primary transition-colors font-medium">
+                  <Link to="/register" className="block px-3 py-2 text-black hover:text-primary transition-colors font-medium">
                     Sign Up
                   </Link>
                 </>

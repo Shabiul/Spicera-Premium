@@ -14,6 +14,7 @@ import {
   type InsertOrderItem 
 } from "@shared/schema";
 import { sendOrderConfirmationEmail } from './email-service';
+import { AuditLogger } from './audit';
 import { z } from "zod";
 
 function getSessionId(req: any): string {
@@ -37,6 +38,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = registerSchema.parse(req.body);
       const { user, token } = await authService.register(validatedData);
+      
+      // Log user registration
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logUserChange(
+        auditContext,
+        'CREATE',
+        user.id,
+        null,
+        { email: user.email, name: user.name, role: user.role }
+      );
+      
       res.json({ success: true, user, token });
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -97,11 +109,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/auth/profile", authenticateToken, async (req, res) => {
     try {
       const { name, phone, address } = req.body;
+      
+      // Get old user data for audit log
+      const oldUser = await storage.getUserById(req.user!.id);
+      
       const updatedUser = await authService.updateUser(req.user!.id, {
         name,
         phone,
         address
       });
+      
+      // Log profile update
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logUserChange(
+        auditContext,
+        'UPDATE',
+        updatedUser.id,
+        { name: oldUser?.name, phone: oldUser?.phone, address: oldUser?.address },
+        { name: updatedUser.name, phone: updatedUser.phone, address: updatedUser.address }
+      );
+      
       res.json({ 
         success: true, 
         user: {
@@ -220,6 +247,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const cartItem = await storage.addToCart(sessionId, productId, quantity, userId);
+      
+      // Log cart addition
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logCartChange(
+        auditContext,
+        'CREATE',
+        cartItem.id,
+        null,
+        { productId, quantity, sessionId, userId }
+      );
+      
       res.json(cartItem);
     } catch (error: any) {
       res.status(400).json({ error: error.message || "Failed to add to cart" });
@@ -234,7 +272,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Valid quantity is required" });
       }
 
+      // Get old cart item data for audit log
+      const oldCartItem = await storage.getCartItem(req.params.id);
+      
       const cartItem = await storage.updateCartItem(req.params.id, quantity);
+      
+      // Log cart update
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logCartChange(
+        auditContext,
+        'UPDATE',
+        cartItem.id,
+        { quantity: oldCartItem?.quantity },
+        { quantity: cartItem.quantity }
+      );
+      
       res.json(cartItem);
     } catch (error: any) {
       res.status(400).json({ error: error.message || "Failed to update cart item" });
@@ -243,7 +295,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/cart/:id", optionalAuth, async (req, res) => {
     try {
+      // Get cart item data for audit log
+      const cartItem = await storage.getCartItem(req.params.id);
+      
       await storage.removeFromCart(req.params.id);
+      
+      // Log cart item deletion
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logCartChange(
+        auditContext,
+        'DELETE',
+        req.params.id,
+        { productId: cartItem?.productId, quantity: cartItem?.quantity },
+        null
+      );
+      
       res.json({ success: true });
     } catch (error: any) {
       res.status(400).json({ error: error.message || "Failed to remove from cart" });
@@ -307,6 +373,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const order = await storage.createOrder(orderData, orderItems);
       
+      // Log order creation
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logOrderChange(
+        auditContext,
+        'CREATE',
+        order.id,
+        null,
+        { 
+          customerName: order.customerName,
+          customerEmail: order.customerEmail,
+          totalAmount: order.totalAmount,
+          itemCount: orderItems.length
+        }
+      );
+      
       // Send order confirmation email
       try {
         await sendOrderConfirmationEmail({
@@ -356,6 +437,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch order" });
     }
   });
+
+  // Admin routes for metrics and management
+  app.get("/api/admin/metrics", requireAdmin, async (req, res) => {
+    try {
+      const metrics = await storage.getAdminMetrics();
+      res.json(metrics);
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to fetch metrics" });
+    }
+  });
+
+  // Audit log routes
+  app.get("/api/admin/audit-logs", requireAdmin, async (req, res) => {
+    try {
+      const { limit = 100, offset = 0, table, user } = req.query;
+      let auditLogs;
+      
+      if (table) {
+        auditLogs = await storage.getAuditLogsByTable(table as string);
+      } else if (user) {
+        auditLogs = await storage.getAuditLogsByUser(user as string);
+      } else {
+        auditLogs = await storage.getAuditLogs(Number(limit), Number(offset));
+      }
+      
+      res.json(auditLogs);
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to fetch audit logs" });
+    }
+  });
+
+  app.get("/api/admin/users", requireAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  app.post("/api/admin/products", requireAdmin, async (req, res) => {
+    try {
+      const result = insertProductSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid product data", details: result.error.issues });
+      }
+
+      const product = await storage.createProduct(result.data);
+      
+      // Log product creation
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logProductChange(
+        auditContext,
+        'CREATE',
+        product.id,
+        null,
+        { name: product.name, price: product.price, stock: product.stock }
+      );
+      
+      res.status(201).json(product);
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to create product" });
+    }
+  });
+
+  app.put("/api/admin/products/:id", requireAdmin, async (req, res) => {
+    try {
+      const result = insertProductSchema.partial().safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid product data", details: result.error.issues });
+      }
+
+      // Get old product data for audit log
+      const oldProduct = await storage.getProduct(req.params.id);
+      
+      const product = await storage.updateProduct(req.params.id, result.data);
+      if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      
+      // Log product update
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logProductChange(
+        auditContext,
+        'UPDATE',
+        product.id,
+        { name: oldProduct?.name, price: oldProduct?.price, stock: oldProduct?.stock },
+        { name: product.name, price: product.price, stock: product.stock }
+      );
+      
+      res.json(product);
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to update product" });
+    }
+  });
+
+  app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
+    try {
+      // Get product data for audit log before deletion
+      const product = await storage.getProduct(req.params.id);
+      
+      const success = await storage.deleteProduct(req.params.id);
+      if (!success) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      
+      // Log product deletion
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logProductChange(
+        auditContext,
+        'DELETE',
+        req.params.id,
+        { name: product?.name, price: product?.price, stock: product?.stock },
+        null
+      );
+      
+      res.json({ message: "Product deleted successfully" });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to delete product" });
+    }
+  });
+
+
 
   const httpServer = createServer(app);
   return httpServer;

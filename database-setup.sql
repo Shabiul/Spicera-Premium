@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS users (
     phone TEXT,
     address TEXT,
     role TEXT NOT NULL DEFAULT 'user',
+    is_active BOOLEAN DEFAULT TRUE,
     createdat TIMESTAMP DEFAULT NOW() NOT NULL,
     updatedat TIMESTAMP DEFAULT NOW() NOT NULL
 );

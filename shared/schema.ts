@@ -107,6 +107,22 @@ export const orderItems = pgTable("order_items", {
   totalPrice: decimal("totalprice", { precision: 10, scale: 2 }).notNull(),
 });
 
+// Audit logs table for tracking all data changes
+export const auditLogs = pgTable("audit_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("userid").references(() => users.id), // who made the change
+  userEmail: text("useremail"), // email of the user who made the change
+  userRole: text("userrole"), // role of the user (customer, admin)
+  tableName: text("tablename").notNull(), // which table was affected
+  recordId: text("recordid"), // ID of the affected record
+  action: text("action").notNull(), // CREATE, UPDATE, DELETE
+  oldData: text("olddata"), // JSON string of old data (for updates/deletes)
+  newData: text("newdata"), // JSON string of new data (for creates/updates)
+  ipAddress: text("ipaddress"), // IP address of the user
+  userAgent: text("useragent"), // browser/client info
+  createdAt: timestamp("createdat").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   cartItems: many(cartItems),
@@ -178,3 +194,12 @@ export type InsertOrder = z.infer<typeof insertOrderSchema>;
 
 export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
+
+// Audit log schema and types
+export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;

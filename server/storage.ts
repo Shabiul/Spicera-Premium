@@ -5,6 +5,7 @@ import {
   orders,
   orderItems,
   users,
+  auditLogs,
   type ContactSubmission, 
   type InsertContactSubmission,
   type Product,
@@ -16,7 +17,9 @@ import {
   type OrderItem,
   type InsertOrderItem,
   type User,
-  type InsertUser
+  type InsertUser,
+  type AuditLog,
+  type InsertAuditLog
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -44,6 +47,7 @@ export interface IStorage {
   
   // Cart operations
   getCartItems(sessionId?: string, userId?: string): Promise<(CartItem & { product: Product })[]>;
+  getCartItem(id: string): Promise<CartItem | undefined>;
   addToCart(sessionId: string | undefined, productId: string, quantity: number, userId?: string): Promise<CartItem>;
   updateCartItem(id: string, quantity: number): Promise<CartItem>;
   removeFromCart(id: string): Promise<void>;
@@ -54,9 +58,68 @@ export interface IStorage {
   getOrders(): Promise<Order[]>;
   getUserOrders(userId: string): Promise<Order[]>;
   getOrder(id: string): Promise<(Order & { items: (OrderItem & { product: Product })[] }) | undefined>;
+  
+  // Admin operations
+  getAdminMetrics(): Promise<{
+    totalUsers: number;
+    totalOrders: number;
+    totalRevenue: number;
+    totalProducts: number;
+    recentOrders: Order[];
+  }>;
+  getAllUsers(): Promise<User[]>;
+  deleteProduct(id: string): Promise<boolean>;
+  promoteToAdmin(email: string): Promise<User>;
+  
+  // Audit logging methods
+  createAuditLog(auditData: InsertAuditLog): Promise<AuditLog>;
+  getAuditLogs(limit?: number, offset?: number): Promise<AuditLog[]>;
+  getAuditLogsByUser(userId: string): Promise<AuditLog[]>;
+  getAuditLogsByTable(tableName: string): Promise<AuditLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
+  // Helper method to create audit log entries
+  private async logAudit({
+    userId,
+    userEmail,
+    userRole,
+    tableName,
+    recordId,
+    action,
+    oldData,
+    newData,
+    ipAddress,
+    userAgent
+  }: {
+    userId?: string;
+    userEmail?: string;
+    userRole?: string;
+    tableName: string;
+    recordId?: string;
+    action: 'CREATE' | 'UPDATE' | 'DELETE';
+    oldData?: any;
+    newData?: any;
+    ipAddress?: string;
+    userAgent?: string;
+  }): Promise<void> {
+    try {
+      await this.createAuditLog({
+        userId,
+        userEmail,
+        userRole,
+        tableName,
+        recordId,
+        action,
+        oldData: oldData ? JSON.stringify(oldData) : null,
+        newData: newData ? JSON.stringify(newData) : null,
+        ipAddress,
+        userAgent
+      });
+    } catch (error) {
+      console.error('Failed to create audit log:', error);
+    }
+  }
   // Contact form operations
   async getContactSubmission(id: string): Promise<ContactSubmission | undefined> {
     const [result] = await db.select().from(contactSubmissions).where(eq(contactSubmissions.id, id));
@@ -164,6 +227,11 @@ export class DatabaseStorage implements IStorage {
     .from(cartItems)
     .innerJoin(products, eq(cartItems.productId, products.id))
     .where(whereCondition);
+  }
+
+  async getCartItem(id: string): Promise<CartItem | undefined> {
+    const [result] = await db.select().from(cartItems).where(eq(cartItems.id, id));
+    return result;
   }
 
   async addToCart(sessionId: string | undefined, productId: string, quantity: number, userId?: string): Promise<CartItem> {
@@ -285,10 +353,32 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(orders).orderBy(desc(orders.createdAt));
   }
 
-  async getUserOrders(userId: string): Promise<Order[]> {
-    return await db.select().from(orders)
+  async getUserOrders(userId: string): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]> {
+    const userOrders = await db.select().from(orders)
       .where(eq(orders.userId, userId))
       .orderBy(desc(orders.createdAt));
+
+    const ordersWithItems = await Promise.all(
+      userOrders.map(async (order) => {
+        const items = await db.select({
+          id: orderItems.id,
+          orderId: orderItems.orderId,
+          productId: orderItems.productId,
+          quantity: orderItems.quantity,
+          unitPrice: orderItems.unitPrice,
+          totalPrice: orderItems.totalPrice,
+          price: orderItems.unitPrice, // Add price field for frontend compatibility
+          product: products,
+        })
+        .from(orderItems)
+        .innerJoin(products, eq(orderItems.productId, products.id))
+        .where(eq(orderItems.orderId, order.id));
+
+        return { ...order, items };
+      })
+    );
+
+    return ordersWithItems;
   }
 
   async getOrder(id: string): Promise<(Order & { items: (OrderItem & { product: Product })[] }) | undefined> {
@@ -309,6 +399,82 @@ export class DatabaseStorage implements IStorage {
     .where(eq(orderItems.orderId, id));
 
     return { ...order, items };
+  }
+
+  // Admin operations
+  async getAdminMetrics() {
+    const [totalUsers] = await db.select({ count: users.id }).from(users);
+    const [totalOrders] = await db.select({ count: orders.id }).from(orders);
+    const [totalProducts] = await db.select({ count: products.id }).from(products);
+    
+    // Calculate total revenue
+    const revenueResult = await db.select({ total: orders.totalAmount }).from(orders);
+    const totalRevenue = revenueResult.reduce((sum, order) => sum + (order.total || 0), 0);
+    
+    // Get recent orders (last 10)
+    const recentOrders = await db.select().from(orders)
+      .orderBy(desc(orders.createdAt))
+      .limit(10);
+    
+    return {
+      totalUsers: totalUsers?.count || 0,
+      totalOrders: totalOrders?.count || 0,
+      totalRevenue,
+      totalProducts: totalProducts?.count || 0,
+      recentOrders
+    };
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select({
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      role: users.role,
+      phone: users.phone,
+      address: users.address,
+      isActive: users.isActive,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt
+    }).from(users).orderBy(desc(users.createdAt));
+  }
+
+  async deleteProduct(id: string): Promise<boolean> {
+    const result = await db.delete(products).where(eq(products.id, id));
+    return result.rowCount > 0;
+  }
+
+  async promoteToAdmin(email: string): Promise<User> {
+    const [result] = await db.update(users)
+      .set({ role: 'admin', updatedAt: new Date() })
+      .where(eq(users.email, email))
+      .returning();
+    return result;
+  }
+
+  // Audit logging methods
+  async createAuditLog(auditData: InsertAuditLog): Promise<AuditLog> {
+    const [result] = await db.insert(auditLogs).values(auditData).returning();
+    return result;
+  }
+
+  async getAuditLogs(limit: number = 100, offset: number = 0): Promise<AuditLog[]> {
+    return await db.select().from(auditLogs)
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getAuditLogsByUser(userId: string): Promise<AuditLog[]> {
+    return await db.select().from(auditLogs)
+      .where(eq(auditLogs.userId, userId))
+      .orderBy(desc(auditLogs.createdAt));
+  }
+
+  async getAuditLogsByTable(tableName: string): Promise<AuditLog[]> {
+    return await db.select().from(auditLogs)
+      .where(eq(auditLogs.tableName, tableName))
+      .orderBy(desc(auditLogs.createdAt));
   }
 }
 

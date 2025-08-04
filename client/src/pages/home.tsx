@@ -1,12 +1,10 @@
 import { useEffect } from "react";
-import Navigation from "@/components/navigation";
 import HeroSection from "@/components/hero-section";
 import ProductsSection from "@/components/products-section";
 import StorySection from "@/components/story-section";
 import QualitySection from "@/components/quality-section";
 import TestimonialsSection from "@/components/testimonials-section";
 import ContactSection from "@/components/contact-section";
-import Footer from "@/components/footer";
 
 export default function Home() {
   useEffect(() => {
@@ -60,14 +58,12 @@ export default function Home() {
 
   return (
     <div className="font-body text-white bg-black min-h-screen">
-      <Navigation />
       <HeroSection />
       <ProductsSection />
       <StorySection />
       <QualitySection />
       <TestimonialsSection />
       <ContactSection />
-      <Footer />
     </div>
   );
 }

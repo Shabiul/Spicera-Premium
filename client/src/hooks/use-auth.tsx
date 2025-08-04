@@ -109,9 +109,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(data.user);
   };
 
-  const logout = () => {
+  const logout = async () => {
     localStorage.removeItem('auth_token');
     setUser(null);
+    
+    // Clear cart cache to update UI immediately
+    const { queryClient } = await import('@/lib/queryClient');
+    queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
   };
 
   const updateProfile = async (profileData: Partial<User>) => {
