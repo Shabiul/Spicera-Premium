@@ -107,6 +107,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     localStorage.setItem('auth_token', data.token);
     setUser(data.user);
+    
+    // Invalidate admin queries to update dashboard
+    const { queryClient } = await import('@/lib/queryClient');
+    queryClient.invalidateQueries({ queryKey: ['admin-metrics'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-users'] });
   };
 
   const logout = async () => {
@@ -136,6 +141,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     setUser(data.user);
+    
+    // Invalidate admin queries to update dashboard
+    const { queryClient } = await import('@/lib/queryClient');
+    queryClient.invalidateQueries({ queryKey: ['admin-users'] });
   };
 
   return (

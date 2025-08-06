@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useLocation, Link } from "wouter";
+import { useState } from "react";
 import { CreditCard, MapPin, User, Phone, Mail, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
+
 
 interface CartItemWithProduct {
   id: string;
@@ -48,6 +50,7 @@ export default function Checkout() {
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading } = useAuth();
 
+
   const { data: cartItems = [], isLoading } = useQuery<CartItemWithProduct[]>({
     queryKey: ["/api/cart"],
   });
@@ -67,7 +70,11 @@ export default function Checkout() {
       const response = await apiRequest("POST", "/api/orders", data);
       return response.json();
     },
-    onSuccess: (order) => {
+    onSuccess: async (order) => {
+      // Invalidate admin queries to update dashboard
+      const { queryClient } = await import('@/lib/queryClient');
+      queryClient.invalidateQueries({ queryKey: ['admin-metrics'] });
+      
       toast({
         title: "Order placed successfully!",
         description: `Your order #${order.id.slice(-8)} has been confirmed.`,
@@ -80,6 +87,7 @@ export default function Checkout() {
         description: error.message || "Failed to place order",
         variant: "destructive",
       });
+
     },
   });
 
@@ -174,15 +182,15 @@ export default function Checkout() {
           {/* Checkout Form */}
           <div>
             <Card className="bg-white border-gray-200 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-gray-900 flex items-center">
-                  <User className="w-5 h-5 mr-2" />
-                  Shipping Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <CardHeader>
+                  <CardTitle className="text-gray-900 flex items-center">
+                    <User className="w-5 h-5 mr-2" />
+                    Shipping Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <FormField
                       control={form.control}
                       name="customerName"
@@ -269,18 +277,18 @@ export default function Checkout() {
                       )}
                     />
 
-                    <Button 
-                      type="submit" 
-                      disabled={createOrderMutation.isPending}
-                      className="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-3 mt-8"
-                    >
-                      <CreditCard className="w-4 h-4 mr-2" />
-                      {createOrderMutation.isPending ? "Processing..." : "Place Order"}
-                    </Button>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
+                      <Button 
+                        type="submit" 
+                        disabled={createOrderMutation.isPending}
+                        className="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-3 mt-8"
+                      >
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        {createOrderMutation.isPending ? "Placing order..." : "Place Order"}
+                      </Button>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
           </div>
 
           {/* Order Summary */}

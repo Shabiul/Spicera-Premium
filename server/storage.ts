@@ -22,7 +22,7 @@ import {
   type InsertAuditLog
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -403,13 +403,13 @@ export class DatabaseStorage implements IStorage {
 
   // Admin operations
   async getAdminMetrics() {
-    const [totalUsers] = await db.select({ count: users.id }).from(users);
-    const [totalOrders] = await db.select({ count: orders.id }).from(orders);
-    const [totalProducts] = await db.select({ count: products.id }).from(products);
+    const [totalUsers] = await db.select({ count: sql`count(*)` }).from(users);
+    const [totalOrders] = await db.select({ count: sql`count(*)` }).from(orders);
+    const [totalProducts] = await db.select({ count: sql`count(*)` }).from(products);
     
     // Calculate total revenue
     const revenueResult = await db.select({ total: orders.totalAmount }).from(orders);
-    const totalRevenue = revenueResult.reduce((sum, order) => sum + (order.total || 0), 0);
+    const totalRevenue = revenueResult.reduce((sum, order) => sum + parseFloat(order.total || '0'), 0);
     
     // Get recent orders (last 10)
     const recentOrders = await db.select().from(orders)
@@ -417,10 +417,10 @@ export class DatabaseStorage implements IStorage {
       .limit(10);
     
     return {
-      totalUsers: totalUsers?.count || 0,
-      totalOrders: totalOrders?.count || 0,
+      totalUsers: Number(totalUsers?.count) || 0,
+      totalOrders: Number(totalOrders?.count) || 0,
       totalRevenue,
-      totalProducts: totalProducts?.count || 0,
+      totalProducts: Number(totalProducts?.count) || 0,
       recentOrders
     };
   }

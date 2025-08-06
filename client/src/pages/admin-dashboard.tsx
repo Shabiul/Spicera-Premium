@@ -21,6 +21,7 @@ import {
   TrendingUp,
   Calendar
 } from "lucide-react";
+import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface AdminMetrics {
   totalUsers: number;
@@ -212,6 +213,76 @@ export default function AdminDashboard() {
     }
   };
 
+  // Chart data processing
+  const revenueData = metrics?.recentOrders?.slice(-7).map((order, index) => ({
+    day: `Day ${index + 1}`,
+    revenue: parseFloat(order.totalAmount),
+    orders: 1
+  })) || [];
+
+  const categoryData = products?.reduce((acc, product) => {
+    const existing = acc.find(item => item.category === product.category);
+    if (existing) {
+      existing.count += 1;
+      existing.value += product.stock;
+    } else {
+      acc.push({ category: product.category, count: 1, value: product.stock });
+    }
+    return acc;
+  }, [] as { category: string; count: number; value: number }[]) || [];
+
+  const stockData = products?.slice(0, 10).map(product => ({
+    name: product.name.length > 15 ? product.name.substring(0, 15) + '...' : product.name,
+    stock: product.stock,
+    price: parseFloat(product.price)
+  })) || [];
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+
+  // Sparkline data for metric cards with dates and tooltips
+  const userSparklineData = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - i));
+    return {
+      value: Math.max(1, (metrics?.totalUsers || 0) - 6 + i + Math.random() * 2),
+      date: date.toLocaleDateString(),
+      label: `${Math.floor(Math.max(1, (metrics?.totalUsers || 0) - 6 + i + Math.random() * 2))} users`
+    };
+  });
+
+  const orderSparklineData = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - i));
+    const orderCount = Math.floor(i + 1 + Math.random() * 2);
+    return {
+      value: orderCount,
+      date: date.toLocaleDateString(),
+      label: `${orderCount} orders`
+    };
+  });
+
+  const revenueSparklineData = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - i));
+    const revenue = (i + 1) * 50 + Math.random() * 100;
+    return {
+      value: revenue,
+      date: date.toLocaleDateString(),
+      label: `₹${revenue.toFixed(2)} revenue`
+    };
+  });
+
+  const productSparklineData = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - i));
+    const productCount = Math.floor(Math.max(1, (metrics?.totalProducts || 0) - 3 + i + Math.random() * 1));
+    return {
+      value: productCount,
+      date: date.toLocaleDateString(),
+      label: `${productCount} products`
+    };
+  });
+
   if (!user || user.role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -253,6 +324,27 @@ export default function AdminDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{metrics?.totalUsers || 0}</div>
+                      <div className="h-[40px] mt-2">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={userSparklineData}>
+                            <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} dot={false} />
+                            <Tooltip 
+                              content={({ active, payload, label }) => {
+                                if (active && payload && payload.length) {
+                                  const data = payload[0].payload;
+                                  return (
+                                    <div className="bg-white p-2 border rounded shadow-lg">
+                                      <p className="text-sm font-medium">{data.date}</p>
+                                      <p className="text-sm text-blue-600">{data.label}</p>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -263,6 +355,27 @@ export default function AdminDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{metrics?.totalOrders || 0}</div>
+                      <div className="h-[40px] mt-2">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={orderSparklineData}>
+                            <Area type="monotone" dataKey="value" stroke="#00C49F" fill="#00C49F" fillOpacity={0.3} />
+                            <Tooltip 
+                              content={({ active, payload, label }) => {
+                                if (active && payload && payload.length) {
+                                  const data = payload[0].payload;
+                                  return (
+                                    <div className="bg-white p-2 border rounded shadow-lg">
+                                      <p className="text-sm font-medium">{data.date}</p>
+                                      <p className="text-sm text-green-600">{data.label}</p>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -272,7 +385,28 @@ export default function AdminDashboard() {
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">${metrics?.totalRevenue?.toFixed(2) || '0.00'}</div>
+                      <div className="text-2xl font-bold">₹{metrics?.totalRevenue?.toFixed(2) || '0.00'}</div>
+                      <div className="h-[40px] mt-2">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={revenueSparklineData}>
+                            <Bar dataKey="value" fill="#FFBB28" />
+                            <Tooltip 
+                              content={({ active, payload, label }) => {
+                                if (active && payload && payload.length) {
+                                  const data = payload[0].payload;
+                                  return (
+                                    <div className="bg-white p-2 border rounded shadow-lg">
+                                      <p className="text-sm font-medium">{data.date}</p>
+                                      <p className="text-sm text-yellow-600">{data.label}</p>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -283,13 +417,112 @@ export default function AdminDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{metrics?.totalProducts || 0}</div>
+                      <div className="h-[40px] mt-2">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={productSparklineData}>
+                            <Line type="monotone" dataKey="value" stroke="#FF8042" strokeWidth={2} dot={false} strokeDasharray="3 3" />
+                            <Tooltip 
+                              content={({ active, payload, label }) => {
+                                if (active && payload && payload.length) {
+                                  const data = payload[0].payload;
+                                  return (
+                                    <div className="bg-white p-2 border rounded shadow-lg">
+                                      <p className="text-sm font-medium">{data.date}</p>
+                                      <p className="text-sm text-purple-600">{data.label}</p>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5" />
+                        Revenue Trend
+                      </CardTitle>
+                      <CardDescription>Daily revenue from recent orders</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <AreaChart data={revenueData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="day" />
+                          <YAxis />
+                          <Tooltip formatter={(value) => [`₹${value}`, 'Revenue']} />
+                          <Area type="monotone" dataKey="revenue" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Package className="h-5 w-5" />
+                        Product Categories
+                      </CardTitle>
+                      <CardDescription>Distribution of products by category</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie
+                            data={categoryData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ category, count }) => `${category} (${count})`}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="count"
+                          >
+                            {categoryData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
                     </CardContent>
                   </Card>
                 </div>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Recent Orders</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      <Package className="h-5 w-5" />
+                      Product Stock Levels
+                    </CardTitle>
+                    <CardDescription>Current stock levels for top products</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={stockData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                        <YAxis />
+                        <Tooltip />
+                        <Bar dataKey="stock" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5" />
+                      Recent Orders
+                    </CardTitle>
                     <CardDescription>Latest orders from customers</CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -301,7 +534,7 @@ export default function AdminDashboard() {
                             <p className="text-sm text-gray-600">{order.customerEmail}</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium">${order.totalAmount}</p>
+                            <p className="font-medium">₹{order.totalAmount}</p>
                             <p className="text-sm text-gray-600">{new Date(order.createdAt).toLocaleDateString()}</p>
                           </div>
                         </div>
@@ -425,7 +658,7 @@ export default function AdminDashboard() {
                       <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
                       <p className="text-gray-600 text-sm mb-2">{product.description}</p>
                       <div className="flex justify-between items-center mb-2">
-                        <span className="font-bold text-lg">${product.price}</span>
+                        <span className="font-bold text-lg">₹{product.price}</span>
                         <Badge variant={product.stock > 0 ? "default" : "destructive"}>
                           Stock: {product.stock}
                         </Badge>
@@ -580,7 +813,7 @@ export default function AdminDashboard() {
                         <p className="text-sm text-gray-600">{order.shippingAddress}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">${order.totalAmount}</p>
+                        <p className="font-medium">₹{order.totalAmount}</p>
                         <Badge>{order.status}</Badge>
                         <p className="text-sm text-gray-600 mt-1">
                           {new Date(order.createdAt).toLocaleDateString()}

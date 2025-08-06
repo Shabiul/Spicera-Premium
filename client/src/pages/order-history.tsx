@@ -136,7 +136,7 @@ export default function OrderHistory() {
                           {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </Badge>
                         <p className="text-lg font-semibold text-gray-900">
-                          ${parseFloat(order.totalAmount).toFixed(2)}
+                          ₹{parseFloat(order.totalAmount).toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -156,11 +156,11 @@ export default function OrderHistory() {
                               <div className="flex-1">
                                 <p className="font-medium text-gray-900">{item.product.name}</p>
                                 <p className="text-sm text-gray-600">
-                                  Quantity: {item.quantity} × ${parseFloat(item.price).toFixed(2)}
+                                  Quantity: {item.quantity} × ₹{parseFloat(item.price).toFixed(2)}
                                 </p>
                               </div>
                               <p className="font-medium text-gray-900">
-                                ${(parseFloat(item.price) * item.quantity).toFixed(2)}
+                                ₹{(parseFloat(item.price) * item.quantity).toFixed(2)}
                               </p>
                             </div>
                           ))}

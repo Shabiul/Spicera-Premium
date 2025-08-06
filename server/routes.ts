@@ -15,6 +15,7 @@ import {
 } from "@shared/schema";
 import { sendOrderConfirmationEmail } from './email-service';
 import { AuditLogger } from './audit';
+
 import { z } from "zod";
 
 function getSessionId(req: any): string {
@@ -327,6 +328,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+
   // Order routes
   app.post("/api/orders", optionalAuth, async (req, res) => {
     try {
@@ -439,7 +442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes for metrics and management
-  app.get("/api/admin/metrics", requireAdmin, async (req, res) => {
+  app.get("/api/admin/metrics", authenticateToken, requireAdmin, async (req, res) => {
     try {
       const metrics = await storage.getAdminMetrics();
       res.json(metrics);
@@ -449,7 +452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Audit log routes
-  app.get("/api/admin/audit-logs", requireAdmin, async (req, res) => {
+  app.get("/api/admin/audit-logs", authenticateToken, requireAdmin, async (req, res) => {
     try {
       const { limit = 100, offset = 0, table, user } = req.query;
       let auditLogs;
@@ -468,7 +471,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/users", requireAdmin, async (req, res) => {
+  app.get("/api/admin/users", authenticateToken, requireAdmin, async (req, res) => {
     try {
       const users = await storage.getAllUsers();
       res.json(users);
@@ -477,7 +480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/products", requireAdmin, async (req, res) => {
+  app.post("/api/admin/products", authenticateToken, requireAdmin, async (req, res) => {
     try {
       const result = insertProductSchema.safeParse(req.body);
       if (!result.success) {
@@ -502,7 +505,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/products/:id", requireAdmin, async (req, res) => {
+  app.put("/api/admin/products/:id", authenticateToken, requireAdmin, async (req, res) => {
     try {
       const result = insertProductSchema.partial().safeParse(req.body);
       if (!result.success) {
@@ -533,7 +536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
+  app.delete("/api/admin/products/:id", authenticateToken, requireAdmin, async (req, res) => {
     try {
       // Get product data for audit log before deletion
       const product = await storage.getProduct(req.params.id);

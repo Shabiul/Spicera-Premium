@@ -94,7 +94,7 @@ export default function ContactSection() {
                 <div>
                   {/* Corrected text color to be visible on white background */}
                   <h4 className="font-semibold text-gray-800 text-lg">Phone</h4>
-                  <p className="text-gray-600">+1 (555) 123-SPICE</p>
+                  <p className="text-gray-600">+91 991659234</p>
                 </div>
               </div>
               
@@ -105,7 +105,7 @@ export default function ContactSection() {
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-800 text-lg">Email</h4>
-                  <p className="text-gray-600">hello@spicerapremium.com</p>
+                  <p className="text-gray-600">spicerapremium@gmail.com</p>
                 </div>
               </div>
               
@@ -116,7 +116,7 @@ export default function ContactSection() {
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-800 text-lg">Location</h4>
-                  <p className="text-gray-600">Artisan District, Portland, OR</p>
+                  <p className="text-gray-600">Bangalore, INDIA</p>
                 </div>
               </div>
             </div>

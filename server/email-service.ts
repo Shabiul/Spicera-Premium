@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import { Order, OrderItem, Product } from '../shared/schema';
 
+
 interface CartItemWithProduct {
   id: string;
   sessionId: string;
@@ -104,7 +105,7 @@ const generateOrderEmailHTML = (data: OrderEmailData): string => {
         <div class="footer">
           <p>Thank you for choosing SpiceCraft!</p>
           <p>Your authentic spice blends will be carefully prepared and shipped to you.</p>
-          <p>For any questions, please contact us at support@spicecraft.com</p>
+          <p>For any questions, please contact us at spicerapremium@gmail.com</p>
         </div>
       </div>
     </body>
@@ -119,8 +120,8 @@ export const sendOrderConfirmationEmail = async (data: OrderEmailData): Promise<
     const htmlContent = generateOrderEmailHTML(data);
     
     const mailOptions = {
-      from: process.env.EMAIL_USER || 'noreply@spicecraft.com',
-      to: 'shabiulhasnain33@gmail.com', // Send to the specified email
+      from: process.env.EMAIL_USER || 'spicerapremium@gmail.com',
+      to: 'spicerapremium@gmail.com', // Send to the specified email
       cc: data.order.customeremail, // Also send a copy to the customer
       subject: `SpiceCraft Order Confirmation - #${data.order.id.slice(-8)}`,
       html: htmlContent

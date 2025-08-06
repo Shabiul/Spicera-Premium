@@ -45,7 +45,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t border-gray-200 mt-12 pt-8 text-center text-gray-600">
-          <p>&copy; 2024 Spicera Premium. All rights reserved. | Privacy Policy | Terms of Service</p>
+          <p>&copy; 2025 Spicera Premium. All rights reserved. | Privacy Policy | Terms of Service</p>
         </div>
       </div>
     </footer>

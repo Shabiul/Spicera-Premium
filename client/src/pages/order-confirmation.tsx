@@ -96,12 +96,12 @@ export default function OrderConfirmation() {
           <div className="mt-12 pt-8 border-t border-gray-200">
             <p className="text-gray-600 text-sm">
               Questions about your order? Contact us at{" "}
-              <a href="mailto:orders@spicera.com" className="text-primary hover:text-primary/80">
-                orders@spicera.com
+              <a href="mailto:spicerapremium@gmail.com" className="text-primary hover:text-primary/80">
+                spicerapremium@gmail.com
               </a>{" "}
               or call{" "}
-              <a href="tel:+1-555-SPICE-1" className="text-primary hover:text-primary/80">
-                +1 (555) SPICE-1
+              <a href="tel:+91-991659234" className="text-primary hover:text-primary/80">
+                +91 991659234
               </a>
             </p>
           </div>
