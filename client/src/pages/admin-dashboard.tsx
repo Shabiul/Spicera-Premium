@@ -68,6 +68,8 @@ export default function AdminDashboard() {
     stock: '',
     featured: false
   });
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const queryClient = useQueryClient();
@@ -152,6 +154,8 @@ export default function AdminDashboard() {
         stock: '',
         featured: false
       });
+      setSelectedImage(null);
+      setImagePreview('');
       setShowAddForm(false);
     }
   });
@@ -549,7 +553,11 @@ export default function AdminDashboard() {
           <TabsContent value="products" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Product Management</h2>
-              <Button onClick={() => setShowAddForm(true)}>
+              <Button onClick={() => {
+                setShowAddForm(true);
+                setSelectedImage(null);
+                setImagePreview('');
+              }}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Product
               </Button>
@@ -613,13 +621,61 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="image">Image URL</Label>
-                      <Input
-                        id="image"
-                        value={newProduct.image}
-                        onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
-                        required
-                      />
+                      <Label htmlFor="image">Product Image</Label>
+                      <div className="space-y-2">
+                        <Input
+                          id="image"
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setSelectedImage(file);
+                              // Create preview
+                              const reader = new FileReader();
+                              reader.onload = (e) => {
+                                const result = e.target?.result as string;
+                                setImagePreview(result);
+                              };
+                              reader.readAsDataURL(file);
+                              
+                              // Upload file to server
+                              try {
+                                const formData = new FormData();
+                                formData.append('image', file);
+                                
+                                const token = localStorage.getItem('auth_token');
+                                const response = await fetch('/api/upload', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Authorization': `Bearer ${token}`
+                                  },
+                                  body: formData
+                                });
+                                
+                                if (response.ok) {
+                                  const result = await response.json();
+                                  setNewProduct({ ...newProduct, image: result.url });
+                                } else {
+                                  console.error('Upload failed');
+                                }
+                              } catch (error) {
+                                console.error('Upload error:', error);
+                              }
+                            }
+                          }}
+                          required
+                        />
+                        {imagePreview && (
+                          <div className="mt-2">
+                            <img 
+                              src={imagePreview} 
+                              alt="Preview" 
+                              className="w-32 h-32 object-cover rounded-md border"
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <input
@@ -634,7 +690,20 @@ export default function AdminDashboard() {
                       <Button type="submit" disabled={createProductMutation.isPending}>
                         {createProductMutation.isPending ? 'Creating...' : 'Create Product'}
                       </Button>
-                      <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
+                      <Button type="button" variant="outline" onClick={() => {
+                        setShowAddForm(false);
+                        setSelectedImage(null);
+                        setImagePreview('');
+                        setNewProduct({
+                          name: '',
+                          description: '',
+                          price: '',
+                          image: '',
+                          category: '',
+                          stock: '',
+                          featured: false
+                        });
+                      }}>
                         Cancel
                       </Button>
                     </div>
@@ -739,12 +808,51 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="edit-image">Image URL</Label>
-                      <Input
-                        id="edit-image"
-                        value={editingProduct.image}
-                        onChange={(e) => setEditingProduct({ ...editingProduct, image: e.target.value })}
-                      />
+                      <Label htmlFor="edit-image">Product Image</Label>
+                      <div className="space-y-2">
+                        <Input
+                          id="edit-image"
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              // Upload file to server
+                              try {
+                                const formData = new FormData();
+                                formData.append('image', file);
+                                
+                                const token = localStorage.getItem('auth_token');
+                                const response = await fetch('/api/upload', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Authorization': `Bearer ${token}`
+                                  },
+                                  body: formData
+                                });
+                                
+                                if (response.ok) {
+                                  const result = await response.json();
+                                  setEditingProduct({ ...editingProduct, image: result.url });
+                                } else {
+                                  console.error('Upload failed');
+                                }
+                              } catch (error) {
+                                console.error('Upload error:', error);
+                              }
+                            }
+                          }}
+                        />
+                        {editingProduct.image && (
+                          <div className="mt-2">
+                            <img 
+                              src={editingProduct.image} 
+                              alt="Current image" 
+                              className="w-32 h-32 object-cover rounded-md border"
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <input

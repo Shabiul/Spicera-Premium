@@ -1,6 +1,10 @@
-import type { Express } from "express";
+import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
+import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 import { storage } from "./storage";
 import { authService } from "./auth-service";
 import { authenticateToken, optionalAuth, requireAdmin, requireCustomer } from "./auth-middleware";
@@ -18,6 +22,36 @@ import { AuditLogger } from './audit';
 
 import { z } from "zod";
 
+// Get current directory for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Configure multer for file uploads
+const uploadStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../uploads/'));
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: uploadStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    // Check if file is an image
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'));
+    }
+  }
+});
+
 function getSessionId(req: any): string {
   if (!req.session.id) {
     req.session.id = Math.random().toString(36).substring(2, 15);
@@ -33,6 +67,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     saveUninitialized: true,
     cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
   }));
+
+  // Serve static files from uploads directory
+  app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+  // File upload endpoint
+  app.post('/api/upload', authenticateToken, requireAdmin, upload.single('image'), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+      
+      const fileUrl = `/uploads/${req.file.filename}`;
+      res.json({ 
+        message: 'File uploaded successfully',
+        filename: req.file.filename,
+        url: fileUrl,
+        originalName: req.file.originalname,
+        size: req.file.size
+      });
+    } catch (error) {
+      console.error('File upload error:', error);
+      res.status(500).json({ error: 'File upload failed' });
+    }
+  });
 
   // Authentication routes
   app.post("/api/auth/register", async (req, res) => {
