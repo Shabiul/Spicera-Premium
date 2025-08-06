@@ -100,9 +100,9 @@ export default function OrderConfirmation() {
                 spicerapremium@gmail.com
               </a>{" "}
               or call{" "}
-              <a href="tel:+91-991659234" className="text-primary hover:text-primary/80">
-                +91 991659234
-              </a>
+              <a href="tel:+91-9916559234" className="text-primary hover:text-primary/80">
+                 +91 9916559234
+               </a>
             </p>
           </div>
         </div>

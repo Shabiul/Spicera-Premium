@@ -94,7 +94,7 @@ export default function ContactSection() {
                 <div>
                   {/* Corrected text color to be visible on white background */}
                   <h4 className="font-semibold text-gray-800 text-lg">Phone</h4>
-                  <p className="text-gray-600">+91 991659234</p>
+                  <p className="text-gray-600">+91 9916559234</p>
                 </div>
               </div>
               
