@@ -174,7 +174,7 @@ export default function Navigation() {
               {/* Mobile Authentication Section */}
               {user ? (
                 <>
-                  <div className="px-3 py-2 text-black border-t border-gray-600 mt-2">
+                  <div className="px-3 py-2 text-black border-t border-gray-600 mt-2 bg-gradient-to-r from-white to-gray-100">
                     <p className="font-medium">{user.name}</p>
                     <p className="text-sm text-gray-600">{user.email}</p>
                   </div>
