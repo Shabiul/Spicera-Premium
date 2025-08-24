@@ -19,9 +19,15 @@ import {
   Edit, 
   Trash2,
   TrendingUp,
-  Calendar
+  Calendar,
+  FileSpreadsheet,
+  Tag,
+  Target
 } from "lucide-react";
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import BulkProductManager from '@/components/BulkProductManager';
+import CouponManager from '@/components/CouponManager';
+import CustomerSegmentation from '@/components/CustomerSegmentation';
 
 interface AdminMetrics {
   totalUsers: number;
@@ -308,11 +314,14 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="products">Products</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
+            <TabsTrigger value="bulk-products">Bulk Products</TabsTrigger>
+            <TabsTrigger value="coupons">Coupons</TabsTrigger>
+            <TabsTrigger value="segments">Segments</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -932,6 +941,30 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="bulk-products" className="space-y-6">
+            <div className="flex items-center gap-2 mb-6">
+              <FileSpreadsheet className="h-6 w-6" />
+              <h2 className="text-2xl font-bold">Bulk Product Management</h2>
+            </div>
+            <BulkProductManager />
+          </TabsContent>
+
+          <TabsContent value="coupons" className="space-y-6">
+            <div className="flex items-center gap-2 mb-6">
+              <Tag className="h-6 w-6" />
+              <h2 className="text-2xl font-bold">Coupon Management</h2>
+            </div>
+            <CouponManager />
+          </TabsContent>
+
+          <TabsContent value="segments" className="space-y-6">
+            <div className="flex items-center gap-2 mb-6">
+              <Target className="h-6 w-6" />
+              <h2 className="text-2xl font-bold">Customer Segmentation</h2>
+            </div>
+            <CustomerSegmentation />
           </TabsContent>
         </Tabs>
       </div>

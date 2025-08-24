@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/use-auth";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -75,6 +76,22 @@ export default function Login() {
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
+          
+          <div className="mt-4">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+            <div className="mt-4">
+              <GoogleSignInButton text="Sign in with Google" />
+            </div>
+          </div>
           
           <div className="mt-4 text-center text-sm">
             Don't have an account?{" "}

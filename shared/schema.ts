@@ -64,7 +64,7 @@ export const products = pgTable("products", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  image: text("image").notNull(),
+  image_url: text("image_url").notNull(),
   category: text("category").notNull(),
   stock: integer("stock").notNull().default(0),
   featured: boolean("featured").default(false),
@@ -203,3 +203,125 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
 
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+
+// Coupons table for discount system
+export const coupons = pgTable("coupons", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: text("code").notNull().unique(),
+  name: text("name").notNull(),
+  description: text("description"),
+  discountType: text("discount_type").notNull(), // percentage, fixed_amount, free_shipping
+  discountValue: decimal("discount_value", { precision: 10, scale: 2 }).notNull(),
+  minimumOrderAmount: decimal("minimum_order_amount", { precision: 10, scale: 2 }),
+  maximumDiscountAmount: decimal("maximum_discount_amount", { precision: 10, scale: 2 }),
+  usageLimit: integer("usage_limit"), // null = unlimited
+  usageCount: integer("usage_count").default(0),
+  userUsageLimit: integer("user_usage_limit").default(1), // per user limit
+  isActive: boolean("is_active").default(true),
+  validFrom: timestamp("valid_from").notNull(),
+  validUntil: timestamp("valid_until").notNull(),
+  applicableCategories: text("applicable_categories"), // JSON array of category names
+  applicableProducts: text("applicable_products"), // JSON array of product IDs
+  createdAt: timestamp("createdat").defaultNow().notNull(),
+  updatedAt: timestamp("updatedat").defaultNow().notNull(),
+});
+
+// Coupon usage tracking
+export const couponUsages = pgTable("coupon_usages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  couponId: varchar("coupon_id").notNull().references(() => coupons.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
+  orderId: varchar("order_id").references(() => orders.id, { onDelete: "cascade" }),
+  discountAmount: decimal("discount_amount", { precision: 10, scale: 2 }).notNull(),
+  usedAt: timestamp("used_at").defaultNow().notNull(),
+});
+
+// Customer segments for targeted marketing
+export const customerSegments = pgTable("customer_segments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  criteria: text("criteria").notNull(), // JSON object with segment criteria
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("createdat").defaultNow().notNull(),
+  updatedAt: timestamp("updatedat").defaultNow().notNull(),
+});
+
+// Customer segment memberships
+export const customerSegmentMemberships = pgTable("customer_segment_memberships", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  segmentId: varchar("segment_id").notNull().references(() => customerSegments.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  addedAt: timestamp("added_at").defaultNow().notNull(),
+  lastUpdated: timestamp("last_updated").defaultNow().notNull(),
+});
+
+// Relations for new tables
+export const couponsRelations = relations(coupons, ({ many }) => ({
+  usages: many(couponUsages),
+}));
+
+export const couponUsagesRelations = relations(couponUsages, ({ one }) => ({
+  coupon: one(coupons, {
+    fields: [couponUsages.couponId],
+    references: [coupons.id],
+  }),
+  user: one(users, {
+    fields: [couponUsages.userId],
+    references: [users.id],
+  }),
+  order: one(orders, {
+    fields: [couponUsages.orderId],
+    references: [orders.id],
+  }),
+}));
+
+export const customerSegmentsRelations = relations(customerSegments, ({ many }) => ({
+  memberships: many(customerSegmentMemberships),
+}));
+
+export const customerSegmentMembershipsRelations = relations(customerSegmentMemberships, ({ one }) => ({
+  segment: one(customerSegments, {
+    fields: [customerSegmentMemberships.segmentId],
+    references: [customerSegments.id],
+  }),
+  user: one(users, {
+    fields: [customerSegmentMemberships.userId],
+    references: [users.id],
+  }),
+}));
+
+// Zod schemas for new tables
+export const insertCouponSchema = createInsertSchema(coupons).omit({
+  id: true,
+  usageCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCouponUsageSchema = createInsertSchema(couponUsages).omit({
+  id: true,
+  usedAt: true,
+});
+
+export const insertCustomerSegmentSchema = createInsertSchema(customerSegments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCustomerSegmentMembershipSchema = createInsertSchema(customerSegmentMemberships).omit({
+  id: true,
+  addedAt: true,
+  lastUpdated: true,
+});
+
+// Types for new tables
+export type Coupon = typeof coupons.$inferSelect;
+export type InsertCoupon = z.infer<typeof insertCouponSchema>;
+export type CouponUsage = typeof couponUsages.$inferSelect;
+export type InsertCouponUsage = z.infer<typeof insertCouponUsageSchema>;
+export type CustomerSegment = typeof customerSegments.$inferSelect;
+export type InsertCustomerSegment = z.infer<typeof insertCustomerSegmentSchema>;
+export type CustomerSegmentMembership = typeof customerSegmentMemberships.$inferSelect;
+export type InsertCustomerSegmentMembership = z.infer<typeof insertCustomerSegmentMembershipSchema>;

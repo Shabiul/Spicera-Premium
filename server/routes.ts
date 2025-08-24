@@ -7,7 +7,26 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { storage } from "./storage";
 import { authService } from "./auth-service";
-import { authenticateToken, optionalAuth, requireAdmin, requireCustomer } from "./auth-middleware";
+import { authenticateToken, requireAdmin, requireCustomer } from "./auth-middleware";
+import jwt from "jsonwebtoken";
+import { Request, Response, NextFunction } from "express";
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
+// Optional authentication middleware (doesn't require login)
+const optionalAuth = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (token) {
+    jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+      if (!err) {
+        req.user = user;
+      }
+    });
+  }
+  next();
+};
 import { 
   insertContactSubmissionSchema, 
   insertProductSchema,
@@ -19,6 +38,15 @@ import {
 } from "@shared/schema";
 import { sendOrderConfirmationEmail } from './email-service';
 import { AuditLogger } from './audit';
+import { CSVService } from './csv-service';
+import { CouponService } from './coupon-service';
+import { SegmentationService } from './segmentation-service';
+import { 
+  coupons, 
+  customerSegments,
+  insertCouponSchema,
+  insertCustomerSegmentSchema
+} from '@shared/schema';
 
 import { z } from "zod";
 
@@ -620,7 +648,306 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== BULK PRODUCT MANAGEMENT ENDPOINTS =====
+  
+  // Export products to CSV
+  app.get("/api/admin/products/export", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const csvData = await CSVService.exportProducts();
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="products-export.csv"');
+      res.send(csvData);
+    } catch (error: any) {
+      console.error('Export error:', error);
+      res.status(500).json({ error: "Failed to export products" });
+    }
+  });
 
+  // Download CSV template
+  app.get("/api/admin/products/template", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const template = CSVService.generateTemplate();
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="product-import-template.csv"');
+      res.send(template);
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to generate template" });
+    }
+  });
+
+  // Import products from CSV
+  app.post("/api/admin/products/import", authenticateToken, requireAdmin, upload.single('csv'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No CSV file uploaded' });
+      }
+
+      const csvContent = req.file.buffer ? req.file.buffer.toString('utf8') : '';
+      if (!csvContent) {
+        return res.status(400).json({ error: 'Empty CSV file' });
+      }
+
+      const results = await CSVService.importProducts(csvContent);
+      
+      // Log bulk import
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logProductChange(
+        auditContext,
+        'BULK_IMPORT',
+        'multiple',
+        null,
+        { 
+          success: results.success, 
+          created: results.created, 
+          updated: results.updated, 
+          errors: results.errors.length 
+        }
+      );
+      
+      res.json(results);
+    } catch (error: any) {
+      console.error('Import error:', error);
+      res.status(500).json({ error: "Failed to import products" });
+    }
+  });
+
+  // ===== COUPON SYSTEM ENDPOINTS =====
+  
+  // Get all coupons
+  app.get("/api/admin/coupons", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const coupons = await CouponService.getAllCoupons();
+      res.json(coupons);
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to fetch coupons" });
+    }
+  });
+
+  // Create coupon
+  app.post("/api/admin/coupons", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertCouponSchema.parse(req.body);
+      const coupon = await CouponService.createCoupon(validatedData);
+      
+      // Log coupon creation
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logChange(
+        auditContext,
+        'coupons',
+        coupon.id,
+        'CREATE',
+        null,
+        { code: coupon.code, name: coupon.name, discountType: coupon.discountType }
+      );
+      
+      res.status(201).json(coupon);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid coupon data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create coupon" });
+    }
+  });
+
+  // Update coupon
+  app.put("/api/admin/coupons/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const updates = insertCouponSchema.partial().parse(req.body);
+      const coupon = await CouponService.updateCoupon(req.params.id, updates);
+      
+      // Log coupon update
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logChange(
+        auditContext,
+        'coupons',
+        coupon.id,
+        'UPDATE',
+        null,
+        updates
+      );
+      
+      res.json(coupon);
+    } catch (error: any) {
+      if (error.message === 'Coupon not found') {
+        return res.status(404).json({ error: "Coupon not found" });
+      }
+      res.status(500).json({ error: "Failed to update coupon" });
+    }
+  });
+
+  // Delete coupon
+  app.delete("/api/admin/coupons/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      await CouponService.deleteCoupon(req.params.id);
+      
+      // Log coupon deletion
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logChange(
+        auditContext,
+        'coupons',
+        req.params.id,
+        'DELETE',
+        null,
+        null
+      );
+      
+      res.json({ message: "Coupon deleted successfully" });
+    } catch (error: any) {
+      if (error.message === 'Coupon not found') {
+        return res.status(404).json({ error: "Coupon not found" });
+      }
+      res.status(500).json({ error: "Failed to delete coupon" });
+    }
+  });
+
+  // Validate coupon (public endpoint)
+  app.post("/api/coupons/validate", optionalAuth, async (req, res) => {
+    try {
+      const { code, cartItems, subtotal } = req.body;
+      
+      if (!code || !cartItems || subtotal === undefined) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      const userId = req.user?.id || null;
+      const result = await CouponService.validateCoupon(code, userId, cartItems, subtotal);
+      
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to validate coupon" });
+    }
+  });
+
+  // ===== CUSTOMER SEGMENTATION ENDPOINTS =====
+  
+  // Get all customer segments
+  app.get("/api/admin/segments", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const segments = await SegmentationService.getAllSegments();
+      res.json(segments);
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to fetch customer segments" });
+    }
+  });
+
+  // Create customer segment
+  app.post("/api/admin/segments", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertCustomerSegmentSchema.parse(req.body);
+      const segment = await SegmentationService.createSegment(validatedData);
+      
+      // Log segment creation
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logChange(
+        auditContext,
+        'customer_segments',
+        segment.id,
+        'CREATE',
+        null,
+        { name: segment.name, criteria: segment.criteria }
+      );
+      
+      res.status(201).json(segment);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid segment data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create customer segment" });
+    }
+  });
+
+  // Update customer segment
+  app.put("/api/admin/segments/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const updates = insertCustomerSegmentSchema.partial().parse(req.body);
+      const segment = await SegmentationService.updateSegment(req.params.id, updates);
+      
+      // Log segment update
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logChange(
+        auditContext,
+        'customer_segments',
+        segment.id,
+        'UPDATE',
+        null,
+        updates
+      );
+      
+      res.json(segment);
+    } catch (error: any) {
+      if (error.message === 'Segment not found') {
+        return res.status(404).json({ error: "Segment not found" });
+      }
+      res.status(500).json({ error: "Failed to update segment" });
+    }
+  });
+
+  // Delete customer segment
+  app.delete("/api/admin/segments/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      await SegmentationService.deleteSegment(req.params.id);
+      
+      // Log segment deletion
+      const auditContext = AuditLogger.extractContext(req);
+      await AuditLogger.logChange(
+        auditContext,
+        'customer_segments',
+        req.params.id,
+        'DELETE',
+        null,
+        null
+      );
+      
+      res.json({ message: "Customer segment deleted successfully" });
+    } catch (error: any) {
+      if (error.message === 'Segment not found') {
+        return res.status(404).json({ error: "Segment not found" });
+      }
+      res.status(500).json({ error: "Failed to delete segment" });
+    }
+  });
+
+  // Get segment members
+  app.get("/api/admin/segments/:id/members", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const members = await SegmentationService.getSegmentMembers(req.params.id);
+      res.json(members);
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to fetch segment members" });
+    }
+  });
+
+  // Get segment analytics
+  app.get("/api/admin/segments/:id/analytics", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const analytics = await SegmentationService.getSegmentAnalytics(req.params.id);
+      res.json(analytics);
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to fetch segment analytics" });
+    }
+  });
+
+  // Refresh segment memberships
+  app.post("/api/admin/segments/:id/refresh", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      await SegmentationService.updateSegmentMemberships(req.params.id);
+      res.json({ message: "Segment memberships refreshed successfully" });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to refresh segment memberships" });
+    }
+  });
+
+  // Refresh all segments
+  app.post("/api/admin/segments/refresh-all", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      await SegmentationService.refreshAllSegments();
+      res.json({ message: "All segment memberships refreshed successfully" });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to refresh all segments" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
