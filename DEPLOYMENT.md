@@ -43,6 +43,11 @@ JWT_SECRET=spicera-jwt-secret-2023
    - `DATABASE_URL` - Your PostgreSQL connection string
    - `SESSION_SECRET` - A random secure string
    - `JWT_SECRET` - A random secure string
+   - `VITE_STACK_PROJECT_ID` - Stack Auth project ID for client-side
+   - `VITE_STACK_PUBLISHABLE_CLIENT_KEY` - Stack Auth publishable client key
+   - `STACK_SECRET_SERVER_KEY` - Stack Auth secret server key
+   - `NEON_API_KEY` - Neon database API key
+   - `NEON_PROJECT_ID` - Neon project identifier
 
 3. **Run database setup**:
    ```bash
