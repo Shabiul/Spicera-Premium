@@ -58,8 +58,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
+        try {
+          const userData = await response.json();
+          setUser(userData);
+        } catch (error) {
+          console.error('Failed to parse user profile response:', error);
+          localStorage.removeItem('auth_token');
+        }
       } else {
         localStorage.removeItem('auth_token');
       }
@@ -80,10 +85,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify(credentials)
     });
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (error) {
+      throw new Error('Invalid response from server');
+    }
     
     if (!response.ok) {
       throw new Error(data.error || 'Login failed');
+    }
+
+    if (!data.success || !data.token) {
+      throw new Error('Invalid response format from server');
     }
 
     localStorage.setItem('auth_token', data.token);
@@ -99,10 +113,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify(userData)
     });
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (error) {
+      throw new Error('Invalid response from server');
+    }
     
     if (!response.ok) {
       throw new Error(data.error || 'Registration failed');
+    }
+
+    if (!data.success || !data.token) {
+      throw new Error('Invalid response format from server');
     }
 
     localStorage.setItem('auth_token', data.token);
@@ -134,7 +157,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify(profileData)
     });
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (error) {
+      throw new Error('Invalid response from server');
+    }
     
     if (!response.ok) {
       throw new Error(data.error || 'Profile update failed');

@@ -21,7 +21,7 @@ interface CartItemWithProduct {
     name: string;
     description: string;
     price: string;
-    imageUrl: string;
+    image: string;
     category: string;
     stock: number;
     featured: boolean;
@@ -184,7 +184,7 @@ export default function Cart() {
                   <div className="flex items-center space-x-4">
                     <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                       <img 
-                        src={item.product.imageUrl} 
+                        src={item.product.image} 
                         alt={item.product.name}
                         className="w-full h-full object-cover"
                       />

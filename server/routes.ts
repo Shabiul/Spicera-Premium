@@ -270,11 +270,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Product routes
   app.get("/api/products", async (req, res) => {
     try {
+      console.log("Fetching products...");
       const products = await storage.getProducts();
+      console.log(`Found ${products.length} products`);
       res.json(products);
     } catch (error: any) {
       console.error("Error fetching products:", error);
-      res.status(500).json({ error: "Failed to fetch products" });
+      res.status(500).json({ error: "Failed to fetch products", details: error.message });
+    }
+  });
+
+  // Debug endpoint to check database connection
+  app.get("/api/debug/products", async (req, res) => {
+    try {
+      console.log("Debug: Checking database connection...");
+      const products = await storage.getProducts();
+      res.json({ 
+        success: true, 
+        productCount: products.length, 
+        products: products.slice(0, 2), // Return first 2 products for debugging
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Debug: Database error:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: error.message, 
+        stack: error.stack,
+        timestamp: new Date().toISOString()
+      });
     }
   });
 
@@ -780,20 +804,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete coupon
   app.delete("/api/admin/coupons/:id", authenticateToken, requireAdmin, async (req, res) => {
     try {
-      await CouponService.deleteCoupon(req.params.id);
+      const deletedCoupon = await CouponService.deleteCoupon(req.params.id);
       
-      // Log coupon deletion
+      // Log coupon deletion with deleted coupon data
       const auditContext = AuditLogger.extractContext(req);
       await AuditLogger.logChange(
         auditContext,
         'coupons',
         req.params.id,
         'DELETE',
-        null,
+        { code: deletedCoupon.code, name: deletedCoupon.name, discountType: deletedCoupon.discountType },
         null
       );
       
-      res.json({ message: "Coupon deleted successfully" });
+      res.json({ message: "Coupon deleted successfully", deletedCoupon });
     } catch (error: any) {
       if (error.message === 'Coupon not found') {
         return res.status(404).json({ error: "Coupon not found" });

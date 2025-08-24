@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS products (
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
-    image_url TEXT NOT NULL,
+    image TEXT NOT NULL,
     category TEXT NOT NULL,
     stock INTEGER NOT NULL DEFAULT 0,
     featured BOOLEAN DEFAULT FALSE,
@@ -100,7 +100,7 @@ CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(userid);
 
 -- Insert initial product data (4 premium masala products)
 -- Only insert if products don't already exist
-INSERT INTO products (name, description, price, image_url, category, stock, featured) 
+INSERT INTO products (name, description, price, image, category, stock, featured) 
 SELECT * FROM (VALUES
 (
     'Biryani Masala',
@@ -138,7 +138,7 @@ SELECT * FROM (VALUES
     55,
     true
 )
-) AS new_products(name, description, price, image_url, category, stock, featured)
+) AS new_products(name, description, price, image, category, stock, featured)
 WHERE NOT EXISTS (
     SELECT 1 FROM products WHERE products.name = new_products.name
 );

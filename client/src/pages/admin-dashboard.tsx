@@ -663,8 +663,12 @@ export default function AdminDashboard() {
                                 });
                                 
                                 if (response.ok) {
-                                  const result = await response.json();
-                                  setNewProduct({ ...newProduct, image: result.url });
+                                  try {
+                                    const result = await response.json();
+                                    setNewProduct({ ...newProduct, image: result.url });
+                                  } catch (error) {
+                                    console.error('Failed to parse upload response:', error);
+                                  }
                                 } else {
                                   console.error('Upload failed');
                                 }
@@ -841,8 +845,12 @@ export default function AdminDashboard() {
                                 });
                                 
                                 if (response.ok) {
-                                  const result = await response.json();
-                                  setEditingProduct({ ...editingProduct, image: result.url });
+                                  try {
+                                    const result = await response.json();
+                                    setEditingProduct({ ...editingProduct, image: result.url });
+                                  } catch (error) {
+                                    console.error('Failed to parse upload response:', error);
+                                  }
                                 } else {
                                   console.error('Upload failed');
                                 }

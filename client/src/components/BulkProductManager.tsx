@@ -25,7 +25,7 @@ export default function BulkProductManager() {
     try {
       const response = await fetch('/api/admin/products/export', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
       
@@ -54,7 +54,7 @@ export default function BulkProductManager() {
     try {
       const response = await fetch('/api/admin/products/template', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
       
@@ -101,7 +101,7 @@ export default function BulkProductManager() {
       const response = await fetch('/api/admin/products/import', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
         body: formData
       });
@@ -110,8 +110,14 @@ export default function BulkProductManager() {
         throw new Error('Import failed');
       }
       
-      const result = await response.json();
-      setImportResult(result);
+      let result;
+      try {
+        result = await response.json();
+        setImportResult(result);
+      } catch (error) {
+        console.error('Failed to parse import response:', error);
+        alert('Failed to parse server response');
+      }
     } catch (error) {
       console.error('Import error:', error);
       alert('Failed to import products');

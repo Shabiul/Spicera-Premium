@@ -48,7 +48,7 @@ export default function OrderHistory() {
     queryFn: async () => {
       const response = await fetch("/api/orders/my", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
         },
       });
       if (!response.ok) {

@@ -74,13 +74,17 @@ export default function CouponManager() {
     try {
       const response = await fetch('/api/admin/coupons', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
       
       if (response.ok) {
-        const data = await response.json();
-        setCoupons(data);
+        try {
+          const data = await response.json();
+          setCoupons(data);
+        } catch (error) {
+          console.error('Failed to parse coupons response:', error);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch coupons:', error);
@@ -112,7 +116,7 @@ export default function CouponManager() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
         body: JSON.stringify(payload)
       });
@@ -123,8 +127,12 @@ export default function CouponManager() {
         setEditingCoupon(null);
         setFormData(initialFormData);
       } else {
-        const error = await response.json();
-        alert(error.error || 'Failed to save coupon');
+        try {
+          const error = await response.json();
+          alert(error.error || 'Failed to save coupon');
+        } catch (parseError) {
+          alert('Failed to save coupon');
+        }
       }
     } catch (error) {
       console.error('Failed to save coupon:', error);
@@ -161,7 +169,7 @@ export default function CouponManager() {
       const response = await fetch(`/api/admin/coupons/${couponId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
 

@@ -133,7 +133,7 @@ export default function Store() {
               <CardContent className="p-0">
                 <div className="aspect-square relative overflow-hidden rounded-t-lg">
                   <img 
-                    src={product.imageUrl} 
+                    src={product.image} 
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />

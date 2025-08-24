@@ -54,7 +54,12 @@ export default function ContactSection() {
         body: formData
       });
       
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (error) {
+        throw new Error('Invalid response from server');
+      }
       
       if (result.success) {
         toast({

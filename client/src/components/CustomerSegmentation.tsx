@@ -99,13 +99,17 @@ export default function CustomerSegmentation() {
     try {
       const response = await fetch('/api/admin/segments', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
       
       if (response.ok) {
-        const data = await response.json();
-        setSegments(data);
+        try {
+          const data = await response.json();
+          setSegments(data);
+        } catch (error) {
+          console.error('Failed to parse segments response:', error);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch segments:', error);
@@ -118,13 +122,17 @@ export default function CustomerSegmentation() {
     try {
       const response = await fetch(`/api/admin/segments/${segmentId}/members`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
       
       if (response.ok) {
-        const data = await response.json();
-        setSegmentMembers(data);
+        try {
+          const data = await response.json();
+          setSegmentMembers(data);
+        } catch (error) {
+          console.error('Failed to parse segment members response:', error);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch segment members:', error);
@@ -135,13 +143,17 @@ export default function CustomerSegmentation() {
     try {
       const response = await fetch(`/api/admin/segments/${segmentId}/analytics`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
       
       if (response.ok) {
-        const data = await response.json();
-        setSegmentAnalytics(data);
+        try {
+          const data = await response.json();
+          setSegmentAnalytics(data);
+        } catch (error) {
+          console.error('Failed to parse segment analytics response:', error);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch segment analytics:', error);
@@ -194,7 +206,7 @@ export default function CustomerSegmentation() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
         body: JSON.stringify(payload)
       });
@@ -205,8 +217,12 @@ export default function CustomerSegmentation() {
         setEditingSegment(null);
         setFormData(initialFormData);
       } else {
-        const error = await response.json();
-        alert(error.error || 'Failed to save segment');
+        try {
+          const error = await response.json();
+          alert(error.error || 'Failed to save segment');
+        } catch (parseError) {
+          alert('Failed to save segment');
+        }
       }
     } catch (error) {
       console.error('Failed to save segment:', error);
@@ -242,7 +258,7 @@ export default function CustomerSegmentation() {
       const response = await fetch(`/api/admin/segments/${segmentId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
 
@@ -266,7 +282,7 @@ export default function CustomerSegmentation() {
       const response = await fetch(`/api/admin/segments/${segmentId}/refresh`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
 
@@ -293,7 +309,7 @@ export default function CustomerSegmentation() {
       const response = await fetch('/api/admin/segments/refresh-all', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
 

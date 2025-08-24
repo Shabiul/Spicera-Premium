@@ -215,10 +215,12 @@ export class CouponService {
   // Create a new coupon
   static async createCoupon(couponData: InsertCoupon): Promise<Coupon> {
     try {
-      // Ensure code is uppercase
+      // Ensure code is uppercase and set timestamps
       const normalizedData = {
         ...couponData,
-        code: couponData.code.toUpperCase()
+        code: couponData.code.toUpperCase(),
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
 
       const result = await db.insert(coupons)
@@ -275,8 +277,9 @@ export class CouponService {
   }
 
   // Delete coupon
-  static async deleteCoupon(id: string): Promise<void> {
+  static async deleteCoupon(id: string): Promise<Coupon> {
     try {
+      // Delete the coupon and return the deleted record for audit purposes
       const result = await db.delete(coupons)
         .where(eq(coupons.id, id))
         .returning();
@@ -284,6 +287,9 @@ export class CouponService {
       if (result.length === 0) {
         throw new Error('Coupon not found');
       }
+
+      // Note: Related coupon_usages will be automatically deleted due to CASCADE constraint
+      return result[0];
     } catch (error) {
       console.error('Error deleting coupon:', error);
       throw new Error('Failed to delete coupon');
