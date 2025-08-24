@@ -65,11 +65,11 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-0;
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-white text-gray-900;
     font-family: 'Inter', sans-serif;
   }
 

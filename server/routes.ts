@@ -7,7 +7,7 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { storage } from "./storage";
 import { authService } from "./auth-service";
-import { authenticateToken, requireAdmin, requireCustomer } from "./auth-middleware";
+import { authenticateToken, optionalAuth as optionalAuthMiddleware, requireAdmin, requireCustomer } from "./auth-middleware";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 
@@ -41,6 +41,7 @@ import { AuditLogger } from './audit';
 import { CSVService } from './csv-service';
 import { CouponService } from './coupon-service';
 import { SegmentationService } from './segmentation-service';
+import { getUserProfile, updateUserProfile } from './stack-auth-routes';
 import { 
   coupons, 
   customerSegments,
@@ -231,6 +232,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to update profile" });
     }
   });
+
+  // Stack Auth profile routes
+  app.get("/api/auth/profile/:userId", getUserProfile);
+  app.put("/api/auth/profile/:userId", updateUserProfile);
 
   // Contact form submission endpoint
   app.post("/api/contact", async (req, res) => {

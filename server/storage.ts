@@ -37,6 +37,10 @@ export interface IStorage {
   getUserById(id: string): Promise<User | undefined>;
   updateUser(id: string, user: Partial<InsertUser>): Promise<User>;
   
+  // Stack Auth profile operations
+  getUserProfile(userId: string): Promise<{ role: string; phone?: string; address?: string } | null>;
+  updateUserProfile(userId: string, profile: { role?: string; phone?: string; address?: string }): Promise<{ role: string; phone?: string; address?: string }>;
+  
   // Product operations
   getProducts(): Promise<Product[]>;
   getFeaturedProducts(): Promise<Product[]>;
@@ -157,6 +161,49 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return result;
+  }
+
+  // Stack Auth profile operations
+  async getUserProfile(userId: string): Promise<{ role: string; phone?: string; address?: string } | null> {
+    const user = await this.getUserById(userId);
+    if (user) {
+      return {
+        role: user.role,
+        phone: user.phone || undefined,
+        address: user.address || undefined
+      };
+    }
+    return null;
+  }
+
+  async updateUserProfile(userId: string, profile: { role?: string; phone?: string; address?: string }): Promise<{ role: string; phone?: string; address?: string }> {
+    // Check if user exists, if not create a basic user record
+    let user = await this.getUserById(userId);
+    
+    if (!user) {
+      // Create a basic user record for Stack Auth users
+      user = await this.createUser({
+        id: userId,
+        email: '', // Will be populated from Stack Auth token
+        name: '', // Will be populated from Stack Auth token
+        role: profile.role || 'customer',
+        phone: profile.phone || null,
+        address: profile.address || null
+      });
+    } else {
+      // Update existing user
+      user = await this.updateUser(userId, {
+        role: profile.role || user.role,
+        phone: profile.phone !== undefined ? profile.phone : user.phone,
+        address: profile.address !== undefined ? profile.address : user.address
+      });
+    }
+    
+    return {
+      role: user.role,
+      phone: user.phone || undefined,
+      address: user.address || undefined
+    };
   }
 
   // Product operations
