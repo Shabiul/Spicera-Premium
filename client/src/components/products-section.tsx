@@ -66,18 +66,11 @@ export default function ProductsSection() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {allProducts.map((product, index) => {
-            const spiceImages = [
-              '/src/assets/images/spices/biryani-masala.jpg', // Biryani
-              '/src/assets/images/spices/korma-masala.jpg', // Korma  
-              '/src/assets/images/spices/GARAM-MASALA.jpeg', // Garam
-              '/src/assets/images/spices/KITCHEN-KING.jpeg'  // Kitchen King
-            ];
-            
             return (
               <div key={product.id} className="group hover-lift glass-card bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 hover:border-primary/50 transition-all duration-300">
                 <div className="relative mb-4 overflow-hidden rounded-lg">
                   <img 
-                    src={spiceImages[index] || spiceImages[0]} 
+                    src={product.image} 
                     alt={product.name} 
                     className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
                   />
