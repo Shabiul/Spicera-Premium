@@ -184,10 +184,10 @@ export default function ContactSection() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Product Inquiry">Product Inquiry</SelectItem>
-                          <SelectItem value="Custom Blend Request">Custom Blend Request</SelectItem>
-                          <SelectItem value="Bulk Order">Bulk Order</SelectItem>
-                          <SelectItem value="General Question">General Question</SelectItem>
+                          <SelectItem className="text-sm font-medium text-black-700" value="Product Inquiry">Product Inquiry</SelectItem>
+                          <SelectItem className="text-sm font-medium text-black-700" value="Custom Blend Request">Custom Blend Request</SelectItem>
+                          <SelectItem className="text-sm font-medium text-black-700" value="Bulk Order">Bulk Order</SelectItem>
+                          <SelectItem className="text-sm font-medium text-black-700" value="General Question">General Question</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

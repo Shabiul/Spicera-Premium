@@ -12,7 +12,7 @@ export default function HeroSection() {
     >
       <div className="text-center text-gray-900 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight hover-float">
-          <span className="text-black">SPICERA</span> <span className="text-primary hover-glow">PREMIUM</span><br />Spice Mixes
+          <span className="text-black">SPICERA</span> <span className="text-black hover-glow">PREMIUM</span><br />Spice Mixes
         </h1>
         <p className="text-lg sm:text-xl md:text-2xl mb-8 font-light leading-relaxed max-w-3xl mx-auto fade-in">
           Handcrafted with love, sourced with care. Experience the true essence of authentic flavors that transform every meal into a culinary masterpiece.
