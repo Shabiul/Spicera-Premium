@@ -16,6 +16,7 @@ import Register from "@/pages/register";
 import Profile from "@/pages/profile";
 import OrderHistory from "@/pages/order-history";
 import AdminDashboard from "@/pages/admin-dashboard";
+import AuthTest from "@/pages/auth-test";
 
 function Router() {
   return (
@@ -28,6 +29,7 @@ function Router() {
         <Route path="/order-confirmation" component={OrderConfirmation} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
+        <Route path="/auth-test" component={AuthTest} />
         <Route path="/profile" component={Profile} />
         <Route path="/orders" component={OrderHistory} />
         <Route path="/admin" component={AdminDashboard} />

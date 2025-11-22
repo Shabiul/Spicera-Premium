@@ -181,59 +181,61 @@ export default function Cart() {
             {cartItems.map((item) => (
               <Card key={item.id} className="bg-white border-gray-200 shadow-sm">
                 <CardContent className="p-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                      <img 
-                        src={item.product.image} 
-                        alt={item.product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    
-                    <div className="flex-grow">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                        {item.product.name}
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {item.product.category}
-                      </p>
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center space-x-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <div className="flex items-start space-x-4 flex-1">
+                      <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                        <img 
+                          src={item.product.image} 
+                          alt={item.product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      
+                      <div className="flex-grow min-w-0">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
+                          {item.product.name}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-2">
+                          {item.product.category}
+                        </p>
+                        <div className="flex items-center justify-between sm:justify-start sm:space-x-3">
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              disabled={item.quantity <= 1 || updateQuantityMutation.isPending}
+                              className="w-8 h-8 p-0 border-gray-300"
+                            >
+                              <Minus className="w-3 h-3" />
+                            </Button>
+                            <span className="w-8 text-center font-medium">
+                              {item.quantity}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              disabled={updateQuantityMutation.isPending}
+                              className="w-8 h-8 p-0 border-gray-300"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </Button>
+                          </div>
                           <Button
                             size="sm"
-                            variant="outline"
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            disabled={item.quantity <= 1 || updateQuantityMutation.isPending}
-                            className="w-8 h-8 p-0 border-gray-300"
+                            variant="ghost"
+                            onClick={() => removeItem(item.id)}
+                            disabled={removeItemMutation.isPending}
+                            className="text-red-500 hover:text-red-400 hover:bg-red-500/10 sm:ml-3"
                           >
-                            <Minus className="w-3 h-3" />
-                          </Button>
-                          <span className="w-8 text-center font-medium">
-                            {item.quantity}
-                          </span>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            disabled={updateQuantityMutation.isPending}
-                            className="w-8 h-8 p-0 border-gray-300"
-                          >
-                            <Plus className="w-3 h-3" />
+                            <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => removeItem(item.id)}
-                          disabled={removeItemMutation.isPending}
-                          className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
                       </div>
                     </div>
                     
-                    <div className="text-right">
+                    <div className="text-right sm:text-right flex-shrink-0">
                       <div className="text-lg font-semibold text-primary">
                         ₹{(parseFloat(item.product.price) * item.quantity).toFixed(0)}
                       </div>

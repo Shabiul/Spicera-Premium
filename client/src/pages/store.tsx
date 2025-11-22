@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ShoppingCart, Plus, Minus, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
@@ -6,19 +6,24 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { getQueryFn, productsApi, cartApi } from "../lib/api";
 import type { Product, CartItem } from "@shared/schema";
 
 export default function Store() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const { data: cartItems = [], refetch: refetchCart } = useQuery<(CartItem & { product: Product })[]>({
+  const { data: cartItems = [] } = useQuery<(CartItem & { product: Product })[]>({
     queryKey: ["/api/cart"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+    staleTime: 2 * 60 * 1000, // 2 minutes for cart data
   });
 
   const categories = ["all", ...Array.from(new Set(products.map(p => p.category)))];
@@ -29,8 +34,8 @@ export default function Store() {
 
   const addToCart = async (productId: string) => {
     try {
-      await apiRequest("POST", "/api/cart", { productId, quantity: 1 });
-      await refetchCart();
+      await cartApi.addItem({ productId, quantity: 1 });
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
       toast({
         title: "Added to cart",
         description: "Product has been added to your cart",
@@ -50,11 +55,11 @@ export default function Store() {
       if (!cartItem) return;
 
       if (quantity <= 0) {
-        await apiRequest("DELETE", `/api/cart/${cartItem.id}`, {});
+        await cartApi.removeItem(cartItem.id);
       } else {
-        await apiRequest("PUT", `/api/cart/${cartItem.id}`, { quantity });
+        await cartApi.updateQuantity(cartItem.id, { quantity });
       }
-      await refetchCart();
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -133,7 +138,7 @@ export default function Store() {
               <CardContent className="p-0">
                 <div className="aspect-square relative overflow-hidden rounded-t-lg">
                   <img 
-                    src={product.image} 
+                    src={product.image_url} 
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
@@ -159,16 +164,18 @@ export default function Store() {
                     {product.description}
                   </p>
                   
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-2xl font-bold text-primary">
-                      ₹{parseFloat(product.price).toFixed(0)}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {(() => {
-                        const remainingStock = getRemainingStock(product.id, product.stock);
-                        return remainingStock > 0 ? `${remainingStock} in stock` : "Out of stock";
-                      })()}
-                    </span>
+                  <div className="mb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <span className="text-2xl font-bold text-primary">
+                        ₹{parseFloat(product.price).toFixed(0)}
+                      </span>
+                      <span className="text-sm text-gray-500 text-left sm:text-right">
+                        {(() => {
+                          const remainingStock = getRemainingStock(product.id, product.stock);
+                          return remainingStock > 0 ? `${remainingStock} in stock` : "Out of stock";
+                        })()}
+                      </span>
+                    </div>
                   </div>
                   
                   <Button 
@@ -194,8 +201,8 @@ export default function Store() {
 
       {/* Floating Cart Widget */}
       {cartItems.length > 0 && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <Card className="bg-white border-gray-200 shadow-2xl shadow-primary/20 max-w-sm">
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
+          <Card className="bg-white border-gray-200 shadow-2xl shadow-primary/20 max-w-xs sm:max-w-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -212,11 +219,11 @@ export default function Store() {
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {cartItems.slice(0, 3).map((item) => (
                   <div key={item.id} className="flex items-center justify-between text-sm bg-gray-50 rounded p-2">
-                    <div className="flex-1">
-                      <p className="text-gray-900 font-medium">{item.product.name}</p>
-                      <p className="text-gray-600">₹{parseFloat(item.product.price).toFixed(0)} each</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-gray-900 font-medium truncate">{item.product.name}</p>
+                      <p className="text-gray-600 text-xs">₹{parseFloat(item.product.price).toFixed(0)} each</p>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 flex-shrink-0">
                       <Button
                         size="sm"
                         variant="outline"

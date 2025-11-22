@@ -23,6 +23,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
+import { initFirebaseAdmin, getFirestore } from './firebase-admin';
 
 // Interface for storage operations
 export interface IStorage {
@@ -208,21 +209,88 @@ export class DatabaseStorage implements IStorage {
 
   // Product operations
   async getProducts(): Promise<Product[]> {
-    return await db.select().from(products).orderBy(desc(products.createdAt));
+    try {
+      const rows = await db.select().from(products).orderBy(desc(products.createdAt));
+      if (rows.length > 0) return rows as Product[];
+    } catch {}
+    try {
+      initFirebaseAdmin();
+      const fs = getFirestore();
+      const snap = await fs.collection('products').orderBy('createdAt', 'desc').get();
+      const list: Product[] = [] as any;
+      snap.forEach(doc => {
+        const d = doc.data() as any;
+        list.push({
+          id: doc.id,
+          name: d.name,
+          description: d.description,
+          price: d.price,
+          image: d.image,
+          category: d.category,
+          stock: d.stock,
+          featured: !!d.featured,
+          createdAt: d.createdAt ? new Date(d.createdAt) : new Date(),
+          updatedAt: d.updatedAt ? new Date(d.updatedAt) : new Date(),
+        } as Product);
+      });
+      return list;
+    } catch {
+      return [];
+    }
   }
 
   async getFeaturedProducts(): Promise<Product[]> {
-    return await db.select().from(products).where(eq(products.featured, true)).orderBy(desc(products.createdAt));
+    const all = await this.getProducts();
+    return all.filter(p => p.featured);
   }
 
   async getProduct(id: string): Promise<Product | undefined> {
-    const [result] = await db.select().from(products).where(eq(products.id, id));
-    return result;
+    try {
+      const [result] = await db.select().from(products).where(eq(products.id, id));
+      if (result) return result as Product;
+    } catch {}
+    try {
+      initFirebaseAdmin();
+      const fs = getFirestore();
+      const doc = await fs.collection('products').doc(id).get();
+      if (!doc.exists) return undefined;
+      const d = doc.data() as any;
+      return {
+        id: doc.id,
+        name: d.name,
+        description: d.description,
+        price: d.price,
+        image: d.image,
+        category: d.category,
+        stock: d.stock,
+        featured: !!d.featured,
+        createdAt: d.createdAt ? new Date(d.createdAt) : new Date(),
+        updatedAt: d.updatedAt ? new Date(d.updatedAt) : new Date(),
+      } as Product;
+    } catch {
+      return undefined;
+    }
   }
 
   async createProduct(product: InsertProduct): Promise<Product> {
     const [result] = await db.insert(products).values(product).returning();
-    return result;
+    try {
+      initFirebaseAdmin();
+      const fs = getFirestore();
+      const now = new Date();
+      await fs.collection('products').doc(result.id).set({
+        name: result.name,
+        description: result.description,
+        price: result.price,
+        image: result.image,
+        category: result.category,
+        stock: result.stock,
+        featured: result.featured,
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+      });
+    } catch {}
+    return result as Product;
   }
 
   async updateProduct(id: string, product: Partial<InsertProduct>): Promise<Product> {

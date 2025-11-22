@@ -1,4 +1,7 @@
 import { storage } from "./storage";
+import { initFirebaseAdmin, getStorage } from './firebase-admin';
+import fs from 'fs';
+import path from 'path';
 import { fileURLToPath } from 'url';
 
 const sampleProducts = [
@@ -79,8 +82,22 @@ const sampleProducts = [
 export async function seedProducts() {
   console.log("Seeding products...");
   try {
+    initFirebaseAdmin();
+    const bucket = getStorage().bucket(process.env.FIREBASE_STORAGE_BUCKET || 'spicera-premium.appspot.com');
     for (const product of sampleProducts) {
-      await storage.createProduct(product);
+      const basename = path.basename(product.image);
+      const localPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../client/src/assets/images/spices', basename);
+      let imageUrl = product.image;
+      if (fs.existsSync(localPath)) {
+        try {
+          const file = bucket.file(`products/${basename}`);
+          const buffer = fs.readFileSync(localPath);
+          await file.save(buffer, { contentType: 'image/jpeg', resumable: false, metadata: { cacheControl: 'public, max-age=31536000' } });
+          await file.makePublic();
+          imageUrl = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+        } catch {}
+      }
+      await storage.createProduct({ ...product, image: imageUrl });
       console.log(`Created product: ${product.name}`);
     }
     console.log("Product seeding completed successfully!");

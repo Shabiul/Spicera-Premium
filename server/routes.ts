@@ -55,19 +55,9 @@ import { z } from "zod";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Configure multer for file uploads
-const uploadStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../uploads/'));
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
+// Configure multer for file uploads (memory storage for Cloud Functions)
 const upload = multer({ 
-  storage: uploadStorage,
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB limit
   },
@@ -101,17 +91,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
   // File upload endpoint
-  app.post('/api/upload', authenticateToken, requireAdmin, upload.single('image'), (req, res) => {
+  app.post('/api/upload', authenticateToken, requireAdmin, upload.single('image'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
-      
-      const fileUrl = `/uploads/${req.file.filename}`;
-      res.json({ 
+
+      const { initFirebaseAdmin, getStorage } = await import('./firebase-admin');
+      initFirebaseAdmin();
+      const bucket = getStorage().bucket();
+
+      const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(req.file.originalname)}`;
+      const file = bucket.file(`uploads/${uniqueName}`);
+      await file.save(req.file.buffer, {
+        contentType: req.file.mimetype,
+        resumable: false,
+        metadata: { cacheControl: 'public, max-age=31536000' },
+      });
+
+      await file.makePublic();
+      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+
+      res.json({
         message: 'File uploaded successfully',
-        filename: req.file.filename,
-        url: fileUrl,
+        filename: uniqueName,
+        url: publicUrl,
         originalName: req.file.originalname,
         size: req.file.size
       });

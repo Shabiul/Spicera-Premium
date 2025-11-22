@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ShoppingCart, Plus } from "lucide-react";
+import { ShoppingCart, Plus, Minus } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +39,35 @@ export default function ProductsSection() {
     }
   };
 
+  const increaseQuantity = async (product: Product) => {
+    const item = cartItems.find((ci) => ci.productId === product.id);
+    try {
+      if (!item) {
+        await apiRequest("POST", "/api/cart", { productId: product.id, quantity: 1 });
+      } else {
+        await apiRequest("PUT", `/api/cart/${item.id}`, { quantity: item.quantity + 1 });
+      }
+      await refetchCart();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message || "Failed to update cart", variant: "destructive" });
+    }
+  };
+
+  const decreaseQuantity = async (product: Product) => {
+    const item = cartItems.find((ci) => ci.productId === product.id);
+    if (!item) return;
+    try {
+      if (item.quantity > 1) {
+        await apiRequest("PUT", `/api/cart/${item.id}`, { quantity: item.quantity - 1 });
+      } else {
+        await apiRequest("DELETE", `/api/cart/${item.id}`);
+      }
+      await refetchCart();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message || "Failed to update cart", variant: "destructive" });
+    }
+  };
+
   const getCartQuantity = (productId: string) => {
     const cartItem = cartItems.find((item) => item.productId === productId);
     return cartItem ? cartItem.quantity : 0;
@@ -65,45 +94,107 @@ export default function ProductsSection() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-          {allProducts.map((product, index) => {
-            return (
-              <div key={product.id} className="group hover-lift glass-card bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 hover:border-primary/50 transition-all duration-300">
-                <div className="relative mb-4 overflow-hidden rounded-lg">
-                  <img 
-                    src={product.image} 
-                    alt={product.name} 
-                    className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  {getCartQuantity(product.id) > 0 && (
-                    <Badge className="absolute -top-2 -right-2 bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold animate-pulse">
-                      {getCartQuantity(product.id)}
-                    </Badge>
-                  )}
-                </div>
-                
-                <div className="text-center">
-                  <h3 className="text-xl font-bold text-white mb-3 group-hover:text-primary transition-colors duration-300">
-                    {product.name}
-                  </h3>
-                  <p className="text-gray-400 text-sm mb-4 leading-relaxed">
-                    {product.description}
-                  </p>
+          {(() => {
+            const wanted = ['garam masala', 'biryani masala', 'shahi biryani masala'];
+            const preferred = allProducts.filter(p => wanted.some(w => p.name.toLowerCase().includes(w)));
+            const samples: Product[] = [
+              {
+                id: 'sample-garam',
+                name: 'Garam Masala',
+                description: 'Classic aromatic blend with rich warmth and depth.',
+                price: '100',
+                image: '/src/assets/images/spices/GARAM-MASALA.jpeg',
+                category: 'Traditional Blends',
+                stock: 100,
+                featured: true,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              } as Product,
+              {
+                id: 'sample-biryani',
+                name: 'Biryani Masala',
+                description: 'Fragrant spice mix perfect for authentic biryani.',
+                price: '100',
+                image: '/src/assets/images/spices/biryani-masala.jpg',
+                category: 'Traditional Blends',
+                stock: 100,
+                featured: true,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              } as Product,
+              {
+                id: 'sample-shahi-biryani',
+                name: 'Shahi Biryani Masala',
+                description: 'Royal biryani blend with luxurious aroma and flavor.',
+                price: '100',
+                image: '/src/assets/images/spices/KITCHEN-KING.jpeg',
+                category: 'Traditional Blends',
+                stock: 100,
+                featured: true,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              } as Product,
+            ];
+            const display = preferred.length > 0 ? preferred : samples;
+            return display.map((product) => {
+              return (
+                <div key={product.id} className="group hover-lift glass-card bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 hover:border-primary/50 transition-all duration-300">
+                  <div className="relative mb-4 overflow-hidden rounded-lg">
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    {getCartQuantity(product.id) > 0 && (
+                      <Badge className="absolute -top-2 -right-2 bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold animate-pulse">
+                        {getCartQuantity(product.id)}
+                      </Badge>
+                    )}
+                  </div>
                   
-                  <div className="flex flex-col gap-3">
-                    <span className="text-2xl font-bold text-primary">₹{product.price}</span>
-                    <Button 
-                      onClick={() => addToCart(product.id, product.name)}
-                      className="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-2 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
-                    >
-                      <ShoppingCart size={16} />
-                      Add to Cart
-                    </Button>
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-primary transition-colors duration-300">
+                      {product.name}
+                    </h3>
+                    <p className="text-gray-400 text-sm mb-4 leading-relaxed">
+                      {product.description}
+                    </p>
+                    
+                    <div className="flex flex-col gap-3">
+                    <div className="text-center">
+                      <span className="text-2xl font-bold text-primary">₹{product.price}</span>
+                    </div>
+                      {product.id.startsWith('sample-') ? (
+                        <div className="flex items-center gap-2">
+                          <Button disabled className="flex-1 bg-primary/50 text-white font-semibold py-2 px-3 rounded-lg">
+                            <Plus size={16} className="flex-shrink-0" />
+                            <span className="truncate">Sample Product</span>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-3">
+                          <Button
+                            onClick={() => decreaseQuantity(product)}
+                            className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg"
+                          >
+                            <Minus size={16} />
+                          </Button>
+                          <span className="min-w-8 text-center font-semibold">{getCartQuantity(product.id)}</span>
+                          <Button
+                            onClick={() => increaseQuantity(product)}
+                            className="bg-primary hover:bg-primary/80 text-white px-3 py-2 rounded-lg"
+                          >
+                            <Plus size={16} />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            });
+          })()}
         </div>
         
         <div className="text-center mt-16 fade-in">

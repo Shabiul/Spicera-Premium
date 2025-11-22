@@ -28,6 +28,7 @@ interface AuthContextType {
   login: (credentials: LoginRequest) => Promise<void>;
   register: (userData: RegisterRequest) => Promise<void>;
   logout: () => void;
+  loginWithGoogle: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
   isLoading: boolean;
 }
@@ -104,6 +105,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(data.user);
   };
 
+  const loginWithGoogle = async () => {
+    const { getAuthInstance } = await import("@/lib/firebase");
+    const { signInWithPopup } = await import("firebase/auth");
+    const { auth, googleProvider } = await getAuthInstance();
+    const result = await signInWithPopup(auth, googleProvider);
+    const { user: fbUser } = result;
+    setUser({
+      id: fbUser.uid,
+      email: fbUser.email || "",
+      name: fbUser.displayName || fbUser.email || "",
+      role: "customer",
+      phone: undefined,
+      address: undefined,
+    });
+  };
+
   const register = async (userData: RegisterRequest) => {
     const response = await fetch('/api/auth/register', {
       method: 'POST',
@@ -140,6 +157,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     localStorage.removeItem('auth_token');
     setUser(null);
+    try {
+      const { getAuthInstance } = await import("@/lib/firebase");
+      const { signOut } = await import("firebase/auth");
+      const { auth } = await getAuthInstance();
+      await signOut(auth);
+    } catch {}
     
     // Clear cart cache to update UI immediately
     const { queryClient } = await import('@/lib/queryClient');
@@ -181,6 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       register,
       logout,
+      loginWithGoogle,
       updateProfile,
       isLoading
     }}>
